@@ -95,9 +95,9 @@ void NGLScene::initializeGL()
   //ngl::Vec3 vel(0.5f,0.0f,0.0f);
   //m_boid.reset(new Boid(pos,vel));
   m_flock.reset(new Flock(pos, 100));
+  m_flock->resetBBox();
  // create our Bounding Box, needs to be done once we have a gl context as we create VAO for drawing
   m_bbox.reset( new ngl::BBox(ngl::Vec3(),80.0f,80.0f,80.0f));
-
   m_bbox->setDrawMode(GL_LINE);
 
   m_sphereUpdateTimer=startTimer(40);
@@ -175,9 +175,9 @@ void NGLScene::updateScene()
 //	{
 //		s.move();
 //	}
-    //m_boid->move();
     m_flock->move();
-	checkCollisions();
+    m_flock->BBoxCollision();
+    //checkCollisions();
 }
 
 
@@ -298,8 +298,8 @@ void NGLScene::timerEvent(QTimerEvent *_event )
 		if (m_animate !=true)
 		{
 			return;
-		}
-	}
+        }
+    }
 	updateScene();
 	update();
 }
@@ -330,7 +330,7 @@ bool NGLScene::sphereSphereCollision( ngl::Vec3 _pos1, GLfloat _radius1, ngl::Ve
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void NGLScene::BBoxCollision()
+/*void NGLScene::BBoxCollision()
 {
   //create an array of the extents of the bounding box
   float ext[6];
@@ -344,32 +344,56 @@ void NGLScene::BBoxCollision()
   // no collision
   GLfloat D;
   // Loop for each sphere in the vector list
-  for(Sphere &s : m_sphereArray)
+//  for(Sphere &s : m_sphereArray)
+//  {
+//    p=s.getPos();
+//    //Now we need to check the Sphere agains all 6 planes of the BBOx
+//    //If a collision is found we change the dir of the Sphere then Break
+//    for(int i=0; i<6; ++i)
+//    {
+//      //to calculate the distance we take the dotporduct of the Plane Normal
+//      //with the new point P
+//      D=m_bbox->getNormalArray()[i].dot(p);
+//      //Now Add the Radius of the sphere to the offsett
+//      D+=s.getRadius();
+//      // If this is greater or equal to the BBox extent /2 then there is a collision
+//      //So we calculate the Spheres new direction
+//      if(D >=ext[i])
+//      {
+//        //We use the same calculation as in raytracing to determine the
+//        // the new direction
+//        GLfloat x= 2*( s.getDirection().dot((m_bbox->getNormalArray()[i])));
+//        ngl::Vec3 d =m_bbox->getNormalArray()[i]*x;
+//        s.setDirection(s.getDirection()-d);
+//        s.setHit();
+//      }//end of hit test
+//     }//end of each face test
+//    }//end of for
+
+  for(Boid &b : m_flock->m_boids)
   {
-    p=s.getPos();
-    //Now we need to check the Sphere agains all 6 planes of the BBOx
-    //If a collision is found we change the dir of the Sphere then Break
-    for(int i=0; i<6; ++i)
-    {
-      //to calculate the distance we take the dotporduct of the Plane Normal
-      //with the new point P
-      D=m_bbox->getNormalArray()[i].dot(p);
-      //Now Add the Radius of the sphere to the offsett
-      D+=s.getRadius();
-      // If this is greater or equal to the BBox extent /2 then there is a collision
-      //So we calculate the Spheres new direction
-      if(D >=ext[i])
+      b.getPos();
+      for(int i=0; i<6; ++i)
       {
-        //We use the same calculation as in raytracing to determine the
-        // the new direction
-        GLfloat x= 2*( s.getDirection().dot((m_bbox->getNormalArray()[i])));
-        ngl::Vec3 d =m_bbox->getNormalArray()[i]*x;
-        s.setDirection(s.getDirection()-d);
-        s.setHit();
-      }//end of hit test
-     }//end of each face test
-    }//end of for
-}
+        //to calculate the distance we take the dotporduct of the Plane Normal
+        //with the new point P
+        D=m_bbox->getNormalArray()[i].dot(p);
+        //Now Add the Radius of the sphere to the offsett
+        D+=b.getRadius();
+        // If this is greater or equal to the BBox extent /2 then there is a collision
+        //So we calculate the Spheres new direction
+        if(D >=ext[i])
+        {
+          //We use the same calculation as in raytracing to determine the
+          // the new direction
+          GLfloat x= 2*( b.getVel().dot((m_bbox->getNormalArray()[i])));
+          ngl::Vec3 d =m_bbox->getNormalArray()[i]*x;
+          b.setVel(b.getVel()-d);
+          b.setHit();
+        }//end of hit test
+       }//end of each face test
+      }//end of for
+}*/
 
 void  NGLScene::checkSphereCollisions()
 {
@@ -408,7 +432,7 @@ void  NGLScene::checkCollisions()
 	{
 		checkSphereCollisions();
 	}
-	BBoxCollision();
+    //BBoxCollision();
 
 }
 

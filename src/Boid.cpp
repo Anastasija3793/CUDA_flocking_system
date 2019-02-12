@@ -14,6 +14,13 @@ Boid::Boid(ngl::Vec3 _pos, ngl::Vec3 _vel, Flock *_flock)
     m_vel=_vel;
     //m_target=_target;
     m_flock=_flock;
+    m_radius = 3.0f;
+
+    m_acc = ngl::Vec3(0.0f,0.0f,0.0f);
+    max_speed = 4; //100
+    max_force = 0.03;
+
+    m_hit=false;
 }
 
 void Boid::updateRotation()
@@ -55,6 +62,33 @@ void Boid::updateRotation()
          m_rotation[1]= 360-steer;
         }
     }
+}
+
+void Boid::applyForce(ngl::Vec3 _force)
+{
+    m_acc+=_force;
+}
+
+void Boid::seek(ngl::Vec3 _target)
+{
+    m_target=_target;
+    m_desired = m_target - m_pos;
+    m_desired.normalize();
+
+    m_desired*= max_speed;
+    m_steer = m_desired - m_vel;
+    m_steer.normalize();
+
+    // if statement for limiting steering by max force
+    auto NormS = m_steer;
+    auto speed = m_steer.length();
+    if (speed > max_force)
+    {
+        NormS.normalize();
+        m_steer = NormS * max_force;
+    }
+    // applying the force to the steering
+    applyForce(m_steer);
 }
 
 void Boid::loadMatricesToShader(ngl::Transformation &_tx, const ngl::Mat4 &_globalMat, const ngl::Mat4 &_view, const ngl::Mat4 &_project) const
@@ -104,7 +138,27 @@ void Boid::move()
 //        }
 
 //    }
+    //m_pos+=m_vel;
+    //randomVel test
+    //m_vel+=randVel/8; //try *0.25 (faster)
+
+
+    m_vel+=m_acc;
+
+    // if statement for limiting velocity by max speed
+    auto NormV = m_vel;
+    auto speed = m_vel.length();
+    if (speed > max_speed)
+    {
+        NormV.normalize();
+        m_vel = NormV * max_speed;
+    }
     m_pos+=m_vel;
-    m_vel+=randVel;
+    m_acc*=0;
+
+    seek(ngl::Vec3(10.0f,0.0f,0.0f));
+    //seek(randVel);
     updateRotation();
+
+    m_hit=false;
 }
