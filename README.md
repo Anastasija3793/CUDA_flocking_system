@@ -1,4 +1,3 @@
-# BoundingBox
-
-Shows how to do sphere -> bounding box collisions as well as sphere->sphere
 # CUDA_flocking_system
+
+Final year CUDA assignment implement on flocking system (based on 2nd year assignment).
