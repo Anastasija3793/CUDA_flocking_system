@@ -88,8 +88,27 @@ void Boid::seek(ngl::Vec3 _target)
         m_steer = NormS * max_force;
     }
     // applying the force to the steering
-    applyForce(m_steer);
+    applyForce(m_steer);//remove when using 3 rules
 }
+
+//void Boid::sepForce()
+//{
+//    for(int i = 0; i < m_sep.size(); ++i)
+//    {
+//        //applyForce(m_steer);
+//    }
+//}
+
+/*void Boid::separate()
+{
+    for(int i = 0; i < m_sep.size(); ++i)
+    {
+        //m_steer = m_sep[i]->m_steer*200;
+        //m_vel = m_sep[i]->m_vel.m_x*=(-1);
+        m_pos = m_sep[i]->m_pos= ngl::Vec3(-20,0,0);
+        //applyForce();
+    }
+}*/
 
 void Boid::loadMatricesToShader(ngl::Transformation &_tx, const ngl::Mat4 &_globalMat, const ngl::Mat4 &_view, const ngl::Mat4 &_project) const
 {
@@ -153,12 +172,12 @@ void Boid::move()
         NormV.normalize();
         m_vel = NormV * max_speed;
     }
+
     m_pos+=m_vel;
     m_acc*=0;
 
-    seek(ngl::Vec3(10.0f,0.0f,0.0f));
+    seek(ngl::Vec3(10.0f,0.0f,0.0f)); //seek target
     //seek(randVel);
     updateRotation();
-
     m_hit=false;
 }

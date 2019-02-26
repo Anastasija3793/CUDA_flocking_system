@@ -25,10 +25,70 @@ void Flock::resetBBox()
 }
 //----------------------------------------------------------------------------------------------------------------------
 
+std::vector<Boid*> Flock::getNeighboursSep(int j)
+{
+    std::vector<Boid*> neighboursSep;
+    auto& thisBoid = m_boids[j];
+    //ngl::Vec3 sepVector = ngl::Vec3(0,20,0);
+    ngl::Vec3 sum = ngl::Vec3(0,0,0);
+    int count = 0;
+
+    //ngl::Vec3 steer = (0,0,0);
+    for(int i=0; i<m_numBoids; ++i)
+    {
+        if (i == j) continue;
+
+        auto d = thisBoid.m_pos - m_boids[i].m_pos;
+        // 0.5 is a radius of neighbourhood
+        if ((d.length() > 0) && (d.length() < 1.2f))
+        {
+            ngl::Vec3 diff = thisBoid.m_pos - m_boids[i].m_pos;
+            diff.normalize();
+            sum+=diff;
+            count++;
+
+//            if (count>0)
+//            {
+//                sum/=count;
+
+//                    //std::abs(m_boids[0].max_speed);
+//                    auto steer = m_boids[i].m_steer*sum;
+//                    m_boids[i].applyForce(steer);
+
+//            }
+
+
+
+            neighboursSep.push_back(&m_boids[i]);
+                //sepVector = += dir/
+                //thisBoid.m_vel*=-1;
+                //m_boids[i].m_vel+=thisBoid.m_pos - m_boids[i].m_pos;
+            //m_boids[i].m_vel*=-1;
+                //thisBoid.m_steer+=sepVector;
+        }
+    }
+    if (count>0)
+    {
+        sum/=count;
+        for(int k=0; k<m_numBoids; ++k)
+        {
+            //std::abs(m_boids[0].max_speed);
+            auto steer = m_boids[k].m_steer*sum;
+            m_boids[k].applyForce(steer);
+        }
+    }
+
+    return neighboursSep;
+}
+
 void Flock::move()
 {
     for(int i=0; i<m_numBoids; ++i)
     {
+        auto neighboursSep = getNeighboursSep(i);
+        m_boids[i].setSeparate(neighboursSep);
+        //m_boids[i].separate();
+
         m_boids[i].move();
     }
 }

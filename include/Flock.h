@@ -29,6 +29,9 @@ public:
     void resetBBox();
     //----------------------------------------------------------------------------------------------------------------------
 
+    //separation test
+    std::vector<Boid*> getNeighboursSep(int j);
+
     int m_numBoids;
 
 private:

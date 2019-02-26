@@ -60,21 +60,28 @@ public:
     void applyForce(ngl::Vec3 _force);
     void seek(ngl::Vec3 _target);
 
+    void setSeparate(const std::vector<Boid*>& newSep) {m_sep = newSep;}
+    void separate();
+    std::vector<Boid*> m_sep;
+    void sepForce();
+
     bool m_wire;
 
     ngl::Vec3 m_force;
     ngl::Vec3 m_target;
     ngl::Vec3 m_steer;
 
-private:
     ngl::Vec3 m_pos;
     ngl::Vec3 m_vel;
+    float max_speed;
+
+private:
     ngl::Vec3 m_rotation;
     //ngl::Vec3 m_target;
     GLfloat m_radius;
 
     ngl::Vec3 m_acc;
-    float max_speed;
+
     float max_force;
     ngl::Vec3 m_desired;
 
