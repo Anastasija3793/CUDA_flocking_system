@@ -14,7 +14,8 @@ class Flock;
 class Boid
 {
 public:
-    Boid(ngl::Vec3 _pos, ngl::Vec3 _vel, Flock *_flock);
+    //Boid(ngl::Vec3 _pos, ngl::Vec3 _vel, Flock *_flock);
+    Boid(Flock *_flock);
     void draw(const std::string &_shaderName,const ngl::Mat4 &_globalMat, const  ngl::Mat4 &_view, const ngl::Mat4 &_project)const ;
     void loadMatricesToShader(ngl::Transformation &_tx, const ngl::Mat4 &_globalMat, const ngl::Mat4 &_view , const ngl::Mat4 &_project)const;
     void updateRotation();

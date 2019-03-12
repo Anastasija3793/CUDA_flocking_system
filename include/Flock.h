@@ -9,7 +9,8 @@
 class Flock
 {
 public:
-    Flock(ngl::Vec3 _pos, int _numBoids);
+    //Flock(ngl::Vec3 _pos, int _numBoids);
+    Flock(int _numBoids);
     ~Flock();
     void draw(const std::string &_shaderName,const ngl::Mat4 &_globalMat, const  ngl::Mat4 &_view, const ngl::Mat4 &_project)const ;
     void move();
@@ -32,7 +33,11 @@ public:
     //separation test
     std::vector<Boid*> getNeighboursSep(int j);
 
+    //separation function for turn on/off separation rule
+    void separation();
+
     int m_numBoids;
+    bool m_sepRun;
 
 private:
     //ngl::Vec3 m_pos;

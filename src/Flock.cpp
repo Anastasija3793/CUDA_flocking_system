@@ -1,7 +1,7 @@
 #include "Flock.h"
 #include <ngl/Random.h>
 
-Flock::Flock(ngl::Vec3 _pos, int _numBoids)
+/*Flock::Flock(ngl::Vec3 _pos, int _numBoids)
 {
     ngl::Random *rand=ngl::Random::instance();
     auto randomVelocity = rand->getRandomVec3();
@@ -11,6 +11,15 @@ Flock::Flock(ngl::Vec3 _pos, int _numBoids)
         randomVelocity = rand->getRandomVec3();
     }
     m_numBoids=_numBoids;
+}*/
+Flock::Flock(int _numBoids)
+{
+    for (int i=0; i< _numBoids; ++i)
+    {
+        m_boids.push_back(Boid(this));
+    }
+    m_numBoids = _numBoids;
+    m_sepRun = false;
 }
 
 Flock::~Flock()
@@ -40,7 +49,7 @@ std::vector<Boid*> Flock::getNeighboursSep(int j)
 
         auto d = thisBoid.m_pos - m_boids[i].m_pos;
         // 0.5 is a radius of neighbourhood
-        if ((d.length() > 0) && (d.length() < 1.2f))
+        if ((d.length() > 0) && (d.length() < 1.2f))//1.8
         {
             ngl::Vec3 diff = thisBoid.m_pos - m_boids[i].m_pos;
             diff.normalize();
@@ -72,6 +81,7 @@ std::vector<Boid*> Flock::getNeighboursSep(int j)
         sum/=count;
         for(int k=0; k<m_numBoids; ++k)
         {
+            //m_boids[k].m_vel.operator *=(-1.0);
             //std::abs(m_boids[0].max_speed);
             auto steer = m_boids[k].m_steer*sum;
             m_boids[k].applyForce(steer);
@@ -87,11 +97,22 @@ void Flock::move()
     {
         auto neighboursSep = getNeighboursSep(i);
         m_boids[i].setSeparate(neighboursSep);
-        //m_boids[i].separate();
+//        if (m_sepRun)
+//        {
+//            m_boids[i].separate();
+//        }
 
         m_boids[i].move();
     }
 }
+
+//void Flock::separation()
+//{
+//    for(int i=0; i<m_numBoids; ++i)
+//    {
+//        m_boids[i].separate();
+//    }
+//}
 
 void Flock::draw(const std::string &_shaderName, const ngl::Mat4 &_globalMat, const ngl::Mat4 &_view, const ngl::Mat4 &_project) const
 {

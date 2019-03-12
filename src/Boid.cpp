@@ -5,13 +5,24 @@
 #include <ngl/VAOPrimitives.h>
 #include <math.h>
 
+//#include <iostream>
 #define PI = 3.14159
 
 
-Boid::Boid(ngl::Vec3 _pos, ngl::Vec3 _vel, Flock *_flock)
+//Boid::Boid(ngl::Vec3 _pos, ngl::Vec3 _vel, Flock *_flock)
+Boid::Boid(Flock *_flock)
 {
-    m_pos=_pos;
-    m_vel=_vel;
+//    ngl::Random *rand=ngl::Random::instance();
+//    ngl::Vec3 randPos = rand->getRandomVec3();
+//    ngl::Vec3 randVel = rand->getRandomVec3();
+    //m_pos=_pos;
+    //m_vel=_vel;
+    //m_pos=ngl::Vec3(0.0f,0.0f,0.0f);
+    //m_vel=ngl::Vec3(1.0f,0.0f,0.0f);
+    m_pos=ngl::Vec3((float(rand())/RAND_MAX), (float(rand())/RAND_MAX), (float(rand())/RAND_MAX));
+    m_vel=ngl::Vec3((float(rand())/RAND_MAX), (float(rand())/RAND_MAX), (float(rand())/RAND_MAX));
+//    m_pos = randPos;
+//    m_vel = randVel;
     //m_target=_target;
     m_flock=_flock;
     m_radius = 3.0f;
@@ -104,8 +115,11 @@ void Boid::seek(ngl::Vec3 _target)
     for(int i = 0; i < m_sep.size(); ++i)
     {
         //m_steer = m_sep[i]->m_steer*200;
-        //m_vel = m_sep[i]->m_vel.m_x*=(-1);
-        m_pos = m_sep[i]->m_pos= ngl::Vec3(-20,0,0);
+        m_vel.m_x = m_sep[i]->m_vel.m_x*=(-1);
+        m_vel.m_y = m_sep[i]->m_vel.m_y*=(-1);
+        m_vel.m_z = m_sep[i]->m_vel.m_z*=(-1);
+        //m_vel = m_sep[i]->m_vel.operator *=(ngl::Vec3(0.0f,0.0f,0.0f));
+        //m_pos = m_sep[i]->m_pos= ngl::Vec3(-20,0,0);
         //applyForce();
     }
 }*/
@@ -146,8 +160,8 @@ void Boid::draw(const std::string &_shaderName, const ngl::Mat4 &_globalMat, con
 
 void Boid::move()
 {
-    ngl::Random *rand=ngl::Random::instance();
-    ngl::Vec3 randVel = rand->getRandomVec3();
+    //ngl::Random *rand=ngl::Random::instance();
+    //ngl::Vec3 randVel = rand->getRandomVec3();
 //    if(m_pos.m_x >= 10)
 //    {
 //        for(int i=0; i<10; i++)

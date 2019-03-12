@@ -21,11 +21,11 @@ NGLScene::NGLScene(int _numSpheres)
   m_checkSphereSphere=false;
   // create vectors for the position and direction
   m_numSpheres=_numSpheres;
-  resetSpheres();
+  //resetSpheres();
 
 }
 
-void NGLScene::resetSpheres()
+/*void NGLScene::resetSpheres()
 {
 	m_sphereArray.clear();
 	ngl::Vec3 dir;
@@ -38,7 +38,7 @@ void NGLScene::resetSpheres()
     //m_sphereArray.push_back(Sphere(rng->getRandomPoint(s_extents,s_extents,s_extents),dir,rng->randomPositiveNumber(2)+0.5f));
 	}
 
-}
+}*/
 NGLScene::~NGLScene()
 {
   std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
@@ -94,7 +94,7 @@ void NGLScene::initializeGL()
   ngl::Vec3 pos(0.0f,0.0f,0.0f);
   //ngl::Vec3 vel(0.5f,0.0f,0.0f);
   //m_boid.reset(new Boid(pos,vel));
-  m_flock.reset(new Flock(pos, 100));
+  m_flock.reset(new Flock(100));
   m_flock->resetBBox();
  // create our Bounding Box, needs to be done once we have a gl context as we create VAO for drawing
   m_bbox.reset( new ngl::BBox(ngl::Vec3(),80.0f,80.0f,80.0f));
@@ -278,9 +278,13 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
   case Qt::Key_N : showNormal(); break;
   case  Qt::Key_Space : m_animate^=true; break;
   case Qt::Key_S : m_checkSphereSphere^=true; break;
-  case Qt::Key_R : resetSpheres(); break;
+  //case Qt::Key_R : resetSpheres(); break;
   case Qt::Key_Minus : removeSphere(); break;
   case Qt::Key_Plus : addSphere(); break;
+
+//  case Qt::Key_Z : m_animate^=true; break;
+  //case Qt::Key_Z : m_flock->separation(); break;
+    case Qt::Key_Z : m_flock->m_sepRun^=true; break;
 
   //case Qt::Key_Z : glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 
