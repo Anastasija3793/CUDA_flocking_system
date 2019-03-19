@@ -39,6 +39,8 @@ public:
     int m_numBoids;
     bool m_sepRun;
 
+    void dumpGeo(const uint _frameNumber);
+
 private:
     //ngl::Vec3 m_pos;
     std::vector<Boid>m_boids;

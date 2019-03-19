@@ -155,7 +155,7 @@ void NGLScene::paintGL()
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["nglColourShader"]->use();
   loadMatricesToColourShader();
-  m_bbox->draw();
+  //m_bbox->draw();
 
   shader->use("nglDiffuseShader");
 
@@ -164,7 +164,7 @@ void NGLScene::paintGL()
 //    s.draw("nglDiffuseShader",m_mouseGlobalTX,m_view,m_project);
 //	}
     //m_boid->draw("nglDiffuseShader",m_mouseGlobalTX,m_view,m_project);
-    m_flock->draw("nglDiffuseShader",m_mouseGlobalTX,m_view,m_project);
+    //m_flock->draw("nglDiffuseShader",m_mouseGlobalTX,m_view,m_project);
 
 }
 
@@ -177,6 +177,12 @@ void NGLScene::updateScene()
 //	}
     m_flock->move();
     m_flock->BBoxCollision();
+
+    if(m_frame <= max_frames)
+    {
+        m_flock->dumpGeo(m_frame);
+        std::cout<<m_frame<<'\n';
+    }
     //checkCollisions();
 }
 
@@ -299,13 +305,14 @@ void NGLScene::timerEvent(QTimerEvent *_event )
 {
 	if(_event->timerId() == m_sphereUpdateTimer)
 	{
-		if (m_animate !=true)
-		{
-			return;
-        }
+//		if (m_animate !=true)
+//		{
+//			return;
+//        }
     }
 	updateScene();
 	update();
+    m_frame++;
 }
 
 

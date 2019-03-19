@@ -72,6 +72,9 @@ private:
     //----------------------------------------------------------------------------------------------------------------------
     std::vector <Sphere> m_sphereArray;
 
+    unsigned int m_frame = 0;
+    unsigned int max_frames = 250;
+
 
     //boid array test
     //std::vector <Boid> m_boidArray;
