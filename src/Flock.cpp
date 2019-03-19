@@ -12,11 +12,17 @@
     }
     m_numBoids=_numBoids;
 }*/
+const static int b_extents=20;
+
 Flock::Flock(int _numBoids)
 {
+    //m_boids.clear();
+    ngl::Random *rand=ngl::Random::instance();
+
     for (int i=0; i< _numBoids; ++i)
     {
-        m_boids.push_back(Boid(this));
+        auto randPos = rand->getRandomPoint(b_extents,b_extents,b_extents);
+        m_boids.push_back(Boid(randPos,this));
     }
     m_numBoids = _numBoids;
     m_sepRun = false;
@@ -49,10 +55,12 @@ std::vector<Boid*> Flock::getNeighboursSep(int j)
 
         auto d = thisBoid.m_pos - m_boids[i].m_pos;
         // 0.5 is a radius of neighbourhood
-        if ((d.length() > 0) && (d.length() < 1.2f))//1.8
+        //if ((d.length() > 0) && (d.length() < 1.2f))//1.8
+        if (d.length() < 1.2f)//1.8
         {
             ngl::Vec3 diff = thisBoid.m_pos - m_boids[i].m_pos;
             diff.normalize();
+            //diff = diff.operator /(d);
             sum+=diff;
             count++;
 
@@ -82,7 +90,7 @@ std::vector<Boid*> Flock::getNeighboursSep(int j)
         for(int k=0; k<m_numBoids; ++k)
         {
             //m_boids[k].m_vel.operator *=(-1.0);
-            //std::abs(m_boids[0].max_speed);
+            //std::abs(m_boids[k].max_speed);
             auto steer = m_boids[k].m_steer*sum;
             m_boids[k].applyForce(steer);
         }
@@ -95,8 +103,8 @@ void Flock::move()
 {
     for(int i=0; i<m_numBoids; ++i)
     {
-        auto neighboursSep = getNeighboursSep(i);
-        m_boids[i].setSeparate(neighboursSep);
+        //auto neighboursSep = getNeighboursSep(i);
+        //m_boids[i].setSeparate(neighboursSep);
 //        if (m_sepRun)
 //        {
 //            m_boids[i].separate();

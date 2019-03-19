@@ -10,7 +10,7 @@
 
 
 //Boid::Boid(ngl::Vec3 _pos, ngl::Vec3 _vel, Flock *_flock)
-Boid::Boid(Flock *_flock)
+Boid::Boid(ngl::Vec3 _pos, Flock *_flock)
 {
 //    ngl::Random *rand=ngl::Random::instance();
 //    ngl::Vec3 randPos = rand->getRandomVec3();
@@ -19,13 +19,15 @@ Boid::Boid(Flock *_flock)
     //m_vel=_vel;
     //m_pos=ngl::Vec3(0.0f,0.0f,0.0f);
     //m_vel=ngl::Vec3(1.0f,0.0f,0.0f);
-    m_pos=ngl::Vec3((float(rand())/RAND_MAX), (float(rand())/RAND_MAX), (float(rand())/RAND_MAX));
+    //m_pos=ngl::Vec3((float(rand())/RAND_MAX), (float(rand())/RAND_MAX), (float(rand())/RAND_MAX));
+    m_pos = _pos;
     m_vel=ngl::Vec3((float(rand())/RAND_MAX), (float(rand())/RAND_MAX), (float(rand())/RAND_MAX));
 //    m_pos = randPos;
 //    m_vel = randVel;
     //m_target=_target;
     m_flock=_flock;
-    m_radius = 3.0f;
+    //r for bbox
+    m_radius = 1.5f;//3.0
 
     m_acc = ngl::Vec3(0.0f,0.0f,0.0f);
     max_speed = 4; //100
@@ -156,6 +158,7 @@ void Boid::draw(const std::string &_shaderName, const ngl::Mat4 &_globalMat, con
     t.setRotation(m_rotation);
     loadMatricesToShader(t,_globalMat,_view,_project);
     prim->draw("cone");
+    //prim->draw("sphere");
 }
 
 void Boid::move()

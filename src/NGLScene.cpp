@@ -87,11 +87,11 @@ void NGLScene::initializeGL()
   glEnable(GL_DEPTH_TEST); // for removal of hidden surfaces
 
   ngl::VAOPrimitives *prim =  ngl::VAOPrimitives::instance();
-  //prim->createSphere("sphere",1.0f,40.0f);
+  //prim->createSphere("sphere",1.5f,40.0f);
 
   prim->createCone("cone",0.8f,3.0f,20,20); //10,2 //("cone",1.5f,3.7f,20,20)
 
-  ngl::Vec3 pos(0.0f,0.0f,0.0f);
+  //ngl::Vec3 pos(0.0f,0.0f,0.0f);
   //ngl::Vec3 vel(0.5f,0.0f,0.0f);
   //m_boid.reset(new Boid(pos,vel));
   m_flock.reset(new Flock(100));
@@ -279,8 +279,8 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
   case  Qt::Key_Space : m_animate^=true; break;
   case Qt::Key_S : m_checkSphereSphere^=true; break;
   //case Qt::Key_R : resetSpheres(); break;
-  case Qt::Key_Minus : removeSphere(); break;
-  case Qt::Key_Plus : addSphere(); break;
+  //case Qt::Key_Minus : removeSphere(); break;
+  //case Qt::Key_Plus : addSphere(); break;
 
 //  case Qt::Key_Z : m_animate^=true; break;
   //case Qt::Key_Z : m_flock->separation(); break;
@@ -309,7 +309,7 @@ void NGLScene::timerEvent(QTimerEvent *_event )
 }
 
 
-bool NGLScene::sphereSphereCollision( ngl::Vec3 _pos1, GLfloat _radius1, ngl::Vec3 _pos2, GLfloat _radius2 )
+/*bool NGLScene::sphereSphereCollision( ngl::Vec3 _pos1, GLfloat _radius1, ngl::Vec3 _pos2, GLfloat _radius2 )
 {
   // the relative position of the spheres
   ngl::Vec3 relPos;
@@ -331,7 +331,7 @@ bool NGLScene::sphereSphereCollision( ngl::Vec3 _pos1, GLfloat _radius1, ngl::Ve
   {
     return false;
   }
-}
+}*/
 
 //----------------------------------------------------------------------------------------------------------------------
 /*void NGLScene::BBoxCollision()
@@ -399,7 +399,7 @@ bool NGLScene::sphereSphereCollision( ngl::Vec3 _pos1, GLfloat _radius1, ngl::Ve
       }//end of for
 }*/
 
-void  NGLScene::checkSphereCollisions()
+/*void  NGLScene::checkSphereCollisions()
 {
   bool collide;
 
@@ -426,10 +426,10 @@ void  NGLScene::checkSphereCollisions()
       }
     }
   }
-}
+}*/
 
 
-void  NGLScene::checkCollisions()
+/*void  NGLScene::checkCollisions()
 {
 
 	if(m_checkSphereSphere == true)
@@ -438,9 +438,9 @@ void  NGLScene::checkCollisions()
 	}
     //BBoxCollision();
 
-}
+}*/
 
-void NGLScene::removeSphere()
+/*void NGLScene::removeSphere()
 {
   std::vector<Sphere>::iterator end=m_sphereArray.end();
   if(--m_numSpheres==0)
@@ -461,7 +461,7 @@ void NGLScene::addSphere()
   // add the spheres to the end of the particle list
   m_sphereArray.push_back(Sphere(rng->getRandomPoint(s_extents,s_extents,s_extents),dir,rng->randomPositiveNumber(2)+0.5));
   ++m_numSpheres;
-}
+}*/
 
 
 
