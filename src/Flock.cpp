@@ -10,7 +10,7 @@ Flock::Flock(int _numBoids)
 {
     //m_boids.clear();
     ngl::Random *rand=ngl::Random::instance();
-
+    ngl::Vec3 rP = rand->getRandomVec3();
     for (int i=0; i< _numBoids; ++i)
     {
         auto randPos = rand->getRandomPoint(b_extents,b_extents,b_extents);
@@ -32,7 +32,7 @@ void Flock::resetBBox()
 }
 //----------------------------------------------------------------------------------------------------------------------
 
-std::vector<Boid*> Flock::getNeighboursSep(int j)
+/*std::vector<Boid*> Flock::getNeighboursSep(int j)
 {
     std::vector<Boid*> neighboursSep;
     auto& thisBoid = m_boids[j];
@@ -89,24 +89,62 @@ std::vector<Boid*> Flock::getNeighboursSep(int j)
     }
 
     return neighboursSep;
+}*/
+
+std::vector<Boid*> Flock::getNeighbours(int j)
+{
+    std::vector<Boid*> neighbours;
+    auto& thisBoid = m_boids[j];
+
+    for(int i = 0; i<m_numBoids; ++i)
+    {
+        if(i == j) continue;
+        auto d = thisBoid.m_pos - m_boids[i].m_pos;
+
+        if(d.length() < m_collRadius)
+        {
+            m_collision = true;
+        }
+    }
+    return neighbours;
 }
 
+/*void Flock::separation()
+{
+
+}
+*/
 void Flock::move()
 {
+    m_collision=false;
     for(int i=0; i<m_numBoids; ++i)
     {
-        //auto neighboursSep = getNeighboursSep(i);
+        //for alignment
+        auto neighbours = getNeighbours(i);
+        m_boids[i].setNeighbours(neighbours);
+
+
         //m_boids[i].setSeparate(neighboursSep);
 //        if (m_sepRun)
 //        {
 //            m_boids[i].separate();
 //        }
 
+        if(m_collision)
+        {
+            m_boids[i].separate();
+            m_collision = false;
+        }
+        else
+        {
+            m_boids[i].seek(ngl::Vec3(10.0f,0.0f,0.0f));
+        }
         m_boids[i].move();
+
     }
 }
 
-
+// write houdini geo file
 void Flock::dumpGeo(uint _frameNumber)
 {
             char fname[150];
@@ -160,16 +198,7 @@ void Flock::dumpGeo(uint _frameNumber)
             file<<ss.rdbuf();
             file.close();
 
-
 }
-
-//void Flock::separation()
-//{
-//    for(int i=0; i<m_numBoids; ++i)
-//    {
-//        m_boids[i].separate();
-//    }
-//}
 
 void Flock::draw(const std::string &_shaderName, const ngl::Mat4 &_globalMat, const ngl::Mat4 &_view, const ngl::Mat4 &_project) const
 {

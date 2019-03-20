@@ -30,18 +30,20 @@ int main(int argc, char **argv)
   // now set the depth buffer to 24 bits
   format.setDepthBufferSize(24);
   // now we are going to create our scene window
-  int numSpheres;
-  if(argc ==1)
-  {
-    numSpheres=50;
-  }
-  else
-  {
-    numSpheres=atoi(argv[1]);
-  }
-  NGLScene window(numSpheres);
+  QSurfaceFormat::setDefaultFormat(format);
+//  int numSpheres;
+//  if(argc ==1)
+//  {
+//    numSpheres=50;
+//  }
+//  else
+//  {
+//    numSpheres=atoi(argv[1]);
+//  }
+  //NGLScene window(numSpheres);
+  NGLScene window;
   // and set the OpenGL format
-  window.setFormat(format);
+  //window.setFormat(format);
   // we can now query the version to see if it worked
   std::cout<<"Profile is "<<format.majorVersion()<<" "<<format.minorVersion()<<"\n";
   // set the window size

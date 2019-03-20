@@ -22,8 +22,8 @@ Boid::Boid(ngl::Vec3 _pos, Flock *_flock)
     m_radius = 1.5f;//3.0
 
     m_acc = ngl::Vec3(0.0f,0.0f,0.0f);
-    max_speed = 4; //100
-    max_force = 0.03;
+    max_speed = 1.3; //100   //4   //1
+    max_force = 0.1; //_// //0.03  //0.5
 
     m_hit=false;
 }
@@ -117,6 +117,15 @@ void Boid::seek(ngl::Vec3 _target)
         //applyForce();
     }
 }*/
+void Boid::separate()
+{
+//    for(int i=0; i<m_neighbour.size(); ++i)
+//    {
+//        m_vel = m_neighbour[i]->m_vel*(-1);
+//    }
+    m_vel = m_vel*(-1);
+    //m_steer = m_steer*(-1);
+}
 
 void Boid::loadMatricesToShader(ngl::Transformation &_tx, const ngl::Mat4 &_globalMat, const ngl::Mat4 &_view, const ngl::Mat4 &_project) const
 {
@@ -149,8 +158,8 @@ void Boid::draw(const std::string &_shaderName, const ngl::Mat4 &_globalMat, con
     t.setPosition(m_pos);
     t.setRotation(m_rotation);
     loadMatricesToShader(t,_globalMat,_view,_project);
-    prim->draw("cone");
-    //prim->draw("sphere");
+    //prim->draw("cone");
+    prim->draw("sphere");
 }
 
 void Boid::move()
@@ -169,7 +178,7 @@ void Boid::move()
     m_pos+=m_vel;
     m_acc*=0;
 
-    seek(ngl::Vec3(10.0f,0.0f,0.0f)); //seek target
+    //seek(ngl::Vec3(10.0f,0.0f,0.0f)); //seek target
     //seek(randVel);
     updateRotation();
     m_hit=false;

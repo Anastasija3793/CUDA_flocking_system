@@ -14,15 +14,12 @@
 //----------------------------------------------------------------------------------------------------------------------
 const static int s_extents=20;
 
-NGLScene::NGLScene(int _numSpheres)
+NGLScene::NGLScene()
 {
-  setTitle("Sphere Bounding Box Collisions");
-  m_animate=true;
-  m_checkSphereSphere=false;
-  // create vectors for the position and direction
-  m_numSpheres=_numSpheres;
-  //resetSpheres();
+  setTitle("Flocking System");
 
+  m_animate=true;
+  //m_numSpheres=_numSpheres;
 }
 
 /*void NGLScene::resetSpheres()
@@ -87,13 +84,10 @@ void NGLScene::initializeGL()
   glEnable(GL_DEPTH_TEST); // for removal of hidden surfaces
 
   ngl::VAOPrimitives *prim =  ngl::VAOPrimitives::instance();
-  //prim->createSphere("sphere",1.5f,40.0f);
+  prim->createSphere("sphere",1.0f,40.0f);
 
-  prim->createCone("cone",0.8f,3.0f,20,20); //10,2 //("cone",1.5f,3.7f,20,20)
+  //prim->createCone("cone",0.8f,3.0f,20,20); //10,2 //("cone",1.5f,3.7f,20,20)
 
-  //ngl::Vec3 pos(0.0f,0.0f,0.0f);
-  //ngl::Vec3 vel(0.5f,0.0f,0.0f);
-  //m_boid.reset(new Boid(pos,vel));
   m_flock.reset(new Flock(100));
   m_flock->resetBBox();
  // create our Bounding Box, needs to be done once we have a gl context as we create VAO for drawing
@@ -155,32 +149,23 @@ void NGLScene::paintGL()
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["nglColourShader"]->use();
   loadMatricesToColourShader();
-  //m_bbox->draw();
+  m_bbox->draw();
 
   shader->use("nglDiffuseShader");
 
-//	for(Sphere s : m_sphereArray)
-//	{
-//    s.draw("nglDiffuseShader",m_mouseGlobalTX,m_view,m_project);
-//	}
-    //m_boid->draw("nglDiffuseShader",m_mouseGlobalTX,m_view,m_project);
-    //m_flock->draw("nglDiffuseShader",m_mouseGlobalTX,m_view,m_project);
+    m_flock->draw("nglDiffuseShader",m_mouseGlobalTX,m_view,m_project);
 
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 void NGLScene::updateScene()
 {
-//	for(Sphere &s : m_sphereArray)
-//	{
-//		s.move();
-//	}
     m_flock->move();
     m_flock->BBoxCollision();
 
     if(m_frame <= max_frames)
     {
-        m_flock->dumpGeo(m_frame);
+        //m_flock->dumpGeo(m_frame);
         std::cout<<m_frame<<'\n';
     }
     //checkCollisions();

@@ -31,7 +31,11 @@ public:
     //----------------------------------------------------------------------------------------------------------------------
 
     //separation test
-    std::vector<Boid*> getNeighboursSep(int j);
+    //std::vector<Boid*> getNeighboursSep(int j);
+
+    std::vector<Boid*> getNeighbours(int j);
+    bool m_collision = false;
+    GLfloat m_collRadius = 1.0f;
 
     //separation function for turn on/off separation rule
     void separation();

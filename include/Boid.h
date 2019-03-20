@@ -67,6 +67,8 @@ public:
     std::vector<Boid*> m_sep;
     void sepForce();
 
+    void setNeighbours(const std::vector<Boid*>& newN) {m_neighbour = newN;}
+    std::vector<Boid*> m_neighbour;
     bool m_wire;
 
     ngl::Vec3 m_force;
