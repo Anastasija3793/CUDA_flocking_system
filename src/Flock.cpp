@@ -10,7 +10,7 @@ Flock::Flock(int _numBoids)
 {
     //m_boids.clear();
     ngl::Random *rand=ngl::Random::instance();
-    ngl::Vec3 rP = rand->getRandomVec3();
+    //ngl::Vec3 rP = rand->getRandomVec3();
     for (int i=0; i< _numBoids; ++i)
     {
         auto randPos = rand->getRandomPoint(b_extents,b_extents,b_extents);
@@ -32,115 +32,11 @@ void Flock::resetBBox()
 }
 //----------------------------------------------------------------------------------------------------------------------
 
-/*std::vector<Boid*> Flock::getNeighboursSep(int j)
+void Flock::update()
 {
-    std::vector<Boid*> neighboursSep;
-    auto& thisBoid = m_boids[j];
-    //ngl::Vec3 sepVector = ngl::Vec3(0,20,0);
-    ngl::Vec3 sum = ngl::Vec3(0,0,0);
-    int count = 0;
-
-    //ngl::Vec3 steer = (0,0,0);
     for(int i=0; i<m_numBoids; ++i)
     {
-        if (i == j) continue;
-
-        auto d = thisBoid.m_pos - m_boids[i].m_pos;
-        // 0.5 is a radius of neighbourhood
-        //if ((d.length() > 0) && (d.length() < 1.2f))//1.8
-        if (d.length() < 1.2f)//1.8
-        {
-            ngl::Vec3 diff = thisBoid.m_pos - m_boids[i].m_pos;
-            diff.normalize();
-            //diff = diff.operator /(d);
-            sum+=diff;
-            count++;
-
-//            if (count>0)
-//            {
-//                sum/=count;
-
-//                    //std::abs(m_boids[0].max_speed);
-//                    auto steer = m_boids[i].m_steer*sum;
-//                    m_boids[i].applyForce(steer);
-
-//            }
-
-
-
-            neighboursSep.push_back(&m_boids[i]);
-                //sepVector = += dir/
-                //thisBoid.m_vel*=-1;
-                //m_boids[i].m_vel+=thisBoid.m_pos - m_boids[i].m_pos;
-            //m_boids[i].m_vel*=-1;
-                //thisBoid.m_steer+=sepVector;
-        }
-    }
-    if (count>0)
-    {
-        sum/=count;
-        for(int k=0; k<m_numBoids; ++k)
-        {
-            //m_boids[k].m_vel.operator *=(-1.0);
-            //std::abs(m_boids[k].max_speed);
-            auto steer = m_boids[k].m_steer*sum;
-            m_boids[k].applyForce(steer);
-        }
-    }
-
-    return neighboursSep;
-}*/
-
-std::vector<Boid*> Flock::getNeighbours(int j)
-{
-    std::vector<Boid*> neighbours;
-    auto& thisBoid = m_boids[j];
-
-    for(int i = 0; i<m_numBoids; ++i)
-    {
-        if(i == j) continue;
-        auto d = thisBoid.m_pos - m_boids[i].m_pos;
-
-        if(d.length() < m_collRadius)
-        {
-            m_collision = true;
-        }
-    }
-    return neighbours;
-}
-
-/*void Flock::separation()
-{
-
-}
-*/
-void Flock::move()
-{
-    m_collision=false;
-    for(int i=0; i<m_numBoids; ++i)
-    {
-        //for alignment
-        auto neighbours = getNeighbours(i);
-        m_boids[i].setNeighbours(neighbours);
-
-
-        //m_boids[i].setSeparate(neighboursSep);
-//        if (m_sepRun)
-//        {
-//            m_boids[i].separate();
-//        }
-
-        if(m_collision)
-        {
-            m_boids[i].separate();
-            m_collision = false;
-        }
-        else
-        {
-            m_boids[i].seek(ngl::Vec3(10.0f,0.0f,0.0f));
-        }
-        m_boids[i].move();
-
+        m_boids[i].update();
     }
 }
 
@@ -221,21 +117,21 @@ void Flock::BBoxCollision()
       // D is the distance of the Agent from the Plane. If it is less than ext[i] then there is
       // no collision
       GLfloat dist;
-      // Loop for each sphere in the vector list
+      // Loop for each boid in the vector list
       for(Boid &b : m_boids)
       {
         newP=b.getPos();
-        //Now we need to check the Sphere agains all 6 planes of the BBOx
-        //If a collision is found we change the dir of the Sphere then Break
+        //Now we need to check the Boid agains all 6 planes of the BBOx
+        //If a collision is found we change the dir of the Boid then Break
         for(int i=0; i<6; ++i)
         {
           //to calculate the distance we take the dotporduct of the Plane Normal
           //with the new point P
           dist=m_bbox->getNormalArray()[i].dot(newP);
-          //Now Add the Radius of the sphere to the offsett
+          //Now Add the Radius of the Boid to the offsett
           dist+=b.getRadius();
           // If this is greater or equal to the BBox extent /2 then there is a collision
-          //So we calculate the Spheres new direction
+          //So we calculate the Boids new direction
           if(dist >=ext[i])
           {
             //We use the same calculation as in raytracing to determine the

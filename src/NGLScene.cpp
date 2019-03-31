@@ -22,20 +22,6 @@ NGLScene::NGLScene()
   //m_numSpheres=_numSpheres;
 }
 
-/*void NGLScene::resetSpheres()
-{
-	m_sphereArray.clear();
-	ngl::Vec3 dir;
-	ngl::Random *rng=ngl::Random::instance();
-	// loop and create the initial particle list
-	for(int i=0; i<m_numSpheres; ++i)
-	{
-		dir=rng->getRandomVec3();
-		// add the spheres to the end of the particle list
-    //m_sphereArray.push_back(Sphere(rng->getRandomPoint(s_extents,s_extents,s_extents),dir,rng->randomPositiveNumber(2)+0.5f));
-	}
-
-}*/
 NGLScene::~NGLScene()
 {
   std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
@@ -89,12 +75,12 @@ void NGLScene::initializeGL()
   //prim->createCone("cone",0.8f,3.0f,20,20); //10,2 //("cone",1.5f,3.7f,20,20)
 
   m_flock.reset(new Flock(100));
-  m_flock->resetBBox();
+  //m_flock->resetBBox();
  // create our Bounding Box, needs to be done once we have a gl context as we create VAO for drawing
   m_bbox.reset( new ngl::BBox(ngl::Vec3(),80.0f,80.0f,80.0f));
   m_bbox->setDrawMode(GL_LINE);
 
-  m_sphereUpdateTimer=startTimer(40);
+  m_updateTimer=startTimer(40);
 
 }
 
@@ -160,10 +146,10 @@ void NGLScene::paintGL()
 //----------------------------------------------------------------------------------------------------------------------
 void NGLScene::updateScene()
 {
-    m_flock->move();
-    m_flock->BBoxCollision();
+    m_flock->update();
+    //m_flock->BBoxCollision();
 
-    if(m_frame <= max_frames)
+    if(m_frame < max_frames)
     {
         //m_flock->dumpGeo(m_frame);
         std::cout<<m_frame<<'\n';
@@ -268,14 +254,14 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
   // show windowed
   case Qt::Key_N : showNormal(); break;
   case  Qt::Key_Space : m_animate^=true; break;
-  case Qt::Key_S : m_checkSphereSphere^=true; break;
+  //case Qt::Key_S : m_checkSphereSphere^=true; break;
   //case Qt::Key_R : resetSpheres(); break;
   //case Qt::Key_Minus : removeSphere(); break;
   //case Qt::Key_Plus : addSphere(); break;
 
 //  case Qt::Key_Z : m_animate^=true; break;
   //case Qt::Key_Z : m_flock->separation(); break;
-    case Qt::Key_Z : m_flock->m_sepRun^=true; break;
+    //case Qt::Key_Z : m_flock->m_sepRun^=true; break;
 
   //case Qt::Key_Z : glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 
@@ -288,7 +274,7 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
 
 void NGLScene::timerEvent(QTimerEvent *_event )
 {
-	if(_event->timerId() == m_sphereUpdateTimer)
+    if(_event->timerId() == m_updateTimer)
 	{
 //		if (m_animate !=true)
 //		{
@@ -299,162 +285,6 @@ void NGLScene::timerEvent(QTimerEvent *_event )
 	update();
     m_frame++;
 }
-
-
-/*bool NGLScene::sphereSphereCollision( ngl::Vec3 _pos1, GLfloat _radius1, ngl::Vec3 _pos2, GLfloat _radius2 )
-{
-  // the relative position of the spheres
-  ngl::Vec3 relPos;
-  //min an max distances of the spheres
-  GLfloat dist;
-  GLfloat minDist;
-  GLfloat len;
-  relPos =_pos1-_pos2;
-  // and the distance
-  len=relPos.length();
-  dist=len*len;
-  minDist =_radius1+_radius2;
-  // if it is a hit
-  if(dist <=(minDist * minDist))
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}*/
-
-//----------------------------------------------------------------------------------------------------------------------
-/*void NGLScene::BBoxCollision()
-{
-  //create an array of the extents of the bounding box
-  float ext[6];
-  ext[0]=ext[1]=(m_bbox->height()/2.0f);
-  ext[2]=ext[3]=(m_bbox->width()/2.0f);
-  ext[4]=ext[5]=(m_bbox->depth()/2.0f);
-  // Dot product needs a Vector so we convert The Point Temp into a Vector so we can
-  // do a dot product on it
-  ngl::Vec3 p;
-  // D is the distance of the Agent from the Plane. If it is less than ext[i] then there is
-  // no collision
-  GLfloat D;
-  // Loop for each sphere in the vector list
-//  for(Sphere &s : m_sphereArray)
-//  {
-//    p=s.getPos();
-//    //Now we need to check the Sphere agains all 6 planes of the BBOx
-//    //If a collision is found we change the dir of the Sphere then Break
-//    for(int i=0; i<6; ++i)
-//    {
-//      //to calculate the distance we take the dotporduct of the Plane Normal
-//      //with the new point P
-//      D=m_bbox->getNormalArray()[i].dot(p);
-//      //Now Add the Radius of the sphere to the offsett
-//      D+=s.getRadius();
-//      // If this is greater or equal to the BBox extent /2 then there is a collision
-//      //So we calculate the Spheres new direction
-//      if(D >=ext[i])
-//      {
-//        //We use the same calculation as in raytracing to determine the
-//        // the new direction
-//        GLfloat x= 2*( s.getDirection().dot((m_bbox->getNormalArray()[i])));
-//        ngl::Vec3 d =m_bbox->getNormalArray()[i]*x;
-//        s.setDirection(s.getDirection()-d);
-//        s.setHit();
-//      }//end of hit test
-//     }//end of each face test
-//    }//end of for
-
-  for(Boid &b : m_flock->m_boids)
-  {
-      b.getPos();
-      for(int i=0; i<6; ++i)
-      {
-        //to calculate the distance we take the dotporduct of the Plane Normal
-        //with the new point P
-        D=m_bbox->getNormalArray()[i].dot(p);
-        //Now Add the Radius of the sphere to the offsett
-        D+=b.getRadius();
-        // If this is greater or equal to the BBox extent /2 then there is a collision
-        //So we calculate the Spheres new direction
-        if(D >=ext[i])
-        {
-          //We use the same calculation as in raytracing to determine the
-          // the new direction
-          GLfloat x= 2*( b.getVel().dot((m_bbox->getNormalArray()[i])));
-          ngl::Vec3 d =m_bbox->getNormalArray()[i]*x;
-          b.setVel(b.getVel()-d);
-          b.setHit();
-        }//end of hit test
-       }//end of each face test
-      }//end of for
-}*/
-
-/*void  NGLScene::checkSphereCollisions()
-{
-  bool collide;
-
-  unsigned int size=m_sphereArray.size();
-
-	for(unsigned int ToCheck=0; ToCheck<size; ++ToCheck)
-	{
-		for(unsigned int Current=0; Current<size; ++Current)
-		{
-			// don't check against self
-			if(ToCheck == Current)  continue;
-
-      else
-      {
-        //cout <<"doing check"<<endl;
-        collide =sphereSphereCollision(m_sphereArray[Current].getPos(),m_sphereArray[Current].getRadius(),
-                                       m_sphereArray[ToCheck].getPos(),m_sphereArray[ToCheck].getRadius()
-                                      );
-        if(collide== true)
-        {
-          m_sphereArray[Current].reverse();
-          m_sphereArray[Current].setHit();
-        }
-      }
-    }
-  }
-}*/
-
-
-/*void  NGLScene::checkCollisions()
-{
-
-	if(m_checkSphereSphere == true)
-	{
-		checkSphereCollisions();
-	}
-    //BBoxCollision();
-
-}*/
-
-/*void NGLScene::removeSphere()
-{
-  std::vector<Sphere>::iterator end=m_sphereArray.end();
-  if(--m_numSpheres==0)
-  {
-    m_numSpheres=1;
-  }
-  else
-  {
-    m_sphereArray.erase(end-1,end);
-  }
-}
-
-void NGLScene::addSphere()
-{
-  ngl::Random *rng=ngl::Random::instance();
-  ngl::Vec3 dir;
-  dir=rng->getRandomVec3();
-  // add the spheres to the end of the particle list
-  m_sphereArray.push_back(Sphere(rng->getRandomPoint(s_extents,s_extents,s_extents),dir,rng->randomPositiveNumber(2)+0.5));
-  ++m_numSpheres;
-}*/
-
 
 
 

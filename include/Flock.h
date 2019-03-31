@@ -13,7 +13,7 @@ public:
     Flock(int _numBoids);
     ~Flock();
     void draw(const std::string &_shaderName,const ngl::Mat4 &_globalMat, const  ngl::Mat4 &_view, const ngl::Mat4 &_project)const ;
-    void move();
+    void update();
 
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief BBoxCollision method checks the collision between boids and bbox
@@ -34,8 +34,8 @@ public:
     //std::vector<Boid*> getNeighboursSep(int j);
 
     std::vector<Boid*> getNeighbours(int j);
-    bool m_collision = false;
-    GLfloat m_collRadius = 1.0f;
+//    bool m_collision = false;
+//    GLfloat m_collRadius = 2.0f;
 
     //separation function for turn on/off separation rule
     void separation();
@@ -45,7 +45,8 @@ public:
 
     void dumpGeo(const uint _frameNumber);
 
-private:
+//private:
+public:
     //ngl::Vec3 m_pos;
     std::vector<Boid>m_boids;
     //ngl::Vec3 m_vel;

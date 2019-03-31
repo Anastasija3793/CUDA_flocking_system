@@ -10,6 +10,8 @@
 #include <ngl/VAOPrimitives.h>
 #include <complex>
 
+#include <ngl/BBox.h>
+
 class Flock;
 
 class Boid
@@ -20,7 +22,7 @@ public:
     void draw(const std::string &_shaderName,const ngl::Mat4 &_globalMat, const  ngl::Mat4 &_view, const ngl::Mat4 &_project)const ;
     void loadMatricesToShader(ngl::Transformation &_tx, const ngl::Mat4 &_globalMat, const ngl::Mat4 &_view , const ngl::Mat4 &_project)const;
     void updateRotation();
-    void move();
+    void update();
 
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief setHit function sets the hit (used for BBox collision)
@@ -60,35 +62,59 @@ public:
     //----------------------------------------------------------------------------------------------------------------------
 
     void applyForce(ngl::Vec3 _force);
-    void seek(ngl::Vec3 _target);
+    //void seek(ngl::Vec3 _target);
+    ngl::Vec3 seek(ngl::Vec3 _target);
+    ngl::Vec3 separate();
+    ngl::Vec3 align();
+    ngl::Vec3 cohesion();
 
-    void setSeparate(const std::vector<Boid*>& newSep) {m_sep = newSep;}
-    void separate();
-    std::vector<Boid*> m_sep;
-    void sepForce();
+    void bbox();
 
-    void setNeighbours(const std::vector<Boid*>& newN) {m_neighbour = newN;}
-    std::vector<Boid*> m_neighbour;
-    bool m_wire;
+//    void setSeparate(const std::vector<Boid*>& newSep) {m_sep = newSep;}
+//    void separate(ngl::Vec3 _target/*std::vector<Boid*> &_testBoid*/);
+//    void averageNeighbourPos();
+//    std::vector<Boid*> m_sep;
+//    void sepForce();
+
+//    void setNeighbours(const std::vector<Boid*>& newN) {m_neighbour = newN;}
+//    std::vector<Boid*> m_neighbour;
+//    bool m_wire;
+
+    void flock();
+
+    void getNeighbour();
 
     ngl::Vec3 m_force;
-    ngl::Vec3 m_target;
+    //ngl::Vec3 m_target = ngl::Vec3(10.0f,0.0f,0.0f);
     ngl::Vec3 m_steer;
 
     ngl::Vec3 m_pos;
     ngl::Vec3 m_vel;
     float max_speed;
 
+    //bool m_collision = false;
+    //GLfloat m_collRadius = 2.0f;
+
+    //ngl::Vec3 m_testBoid;
+    GLfloat m_radius = 10.0f;
+
+
+    std::unique_ptr<ngl::BBox> m_bbox;
+    void BBoxCollision();
+
 private:
     ngl::Vec3 m_rotation;
-    //ngl::Vec3 m_target;
-    GLfloat m_radius;
+    ngl::Vec3 m_target;
+
 
     ngl::Vec3 m_acc;
 
     float max_force;
     ngl::Vec3 m_desired;
 
+    float m_sepRad = 20.0f; //25
+    float m_neighbourDist = 40.0f; //50
+    //for bbox collision
     bool m_hit;
     const Flock *m_flock;
 };
