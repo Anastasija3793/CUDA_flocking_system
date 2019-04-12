@@ -1,5 +1,5 @@
 # This specifies the exe name
-TARGET=../lib/FlockGPU
+TARGET=FlockGPU
 
 TEMPLATE = lib
 # where to put the .o files
@@ -27,7 +27,8 @@ CUDA_SOURCES += $$PWD/src/BoidGPU.cu \
                 $$PWD/src/FlockGPU.cu
 # same for the .h files
 HEADERS+= $$PWD/include/BoidGPU.cuh \
-          $$PWD/include/FlockGPU.cuh
+          $$PWD/include/FlockGPU.cuh \
+          $$PWD/include/FlockBehaviourKernels.cuh
 # and add the include dir into the search path for Qt and make
 INCLUDEPATH +=./include
 # where our exe is going to live (root of project)
