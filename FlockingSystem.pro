@@ -1,4 +1,4 @@
 TEMPLATE = subdirs
 
-SUBDIRS = flockCPU/flockCPU.pro \
-          flockGPU/flockGPU.pro
+SUBDIRS = libFlockCPU/libFlockCPU.pro \
+          libFlockGPU/libFlockGPU.pro
