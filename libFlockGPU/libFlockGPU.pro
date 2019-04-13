@@ -23,12 +23,12 @@ CONFIG-=app_bundle
 #          $$PWD/src/BoidGPU.cu \
 #          $$PWD/src/FlockGPU.cu
 
-CUDA_SOURCES += $$PWD/src/BoidGPU.cu \
-                $$PWD/src/FlockGPU.cu
+CUDA_SOURCES += $$PWD/src/FlockGPU.cu
+#                $$PWD/src/BoidGPU.cu
 # same for the .h files
-HEADERS+= $$PWD/include/BoidGPU.cuh \
-          $$PWD/include/FlockGPU.cuh \
-          $$PWD/include/FlockBehaviourKernels.cuh
+HEADERS+= $$PWD/include/FlockGPU.cuh \
+          $$PWD/include/BoidGPUKernels.cuh
+#          $$PWD/include/BoidGPU.cuh
 # and add the include dir into the search path for Qt and make
 INCLUDEPATH +=./include
 # where our exe is going to live (root of project)

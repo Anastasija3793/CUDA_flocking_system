@@ -18,29 +18,35 @@ public:
     ~FlockGPU();
 
     void update();
+    int randFloats(float *&devData, const size_t n);
     //void draw();
     void dumpGeo(const uint _frameNumber);
 
 private:
     int m_numBoids;
 
-    // stores boids x,y,z, position
-    thrust::device_vector<float> m_dPosX;
-    thrust::device_vector<float> m_dPosY;
-    thrust::device_vector<float> m_dPosZ;
+    // stores boids x,y,z, position //float3?
+    thrust::device_vector<float3> m_dPos;
+//    thrust::device_vector<float> m_dPosY;
+//    thrust::device_vector<float> m_dPosZ;
 
-    float * m_dPosX_ptr;
-    float * m_dPosY_ptr;
-    float * m_dPosZ_ptr;
+    float3 * m_dPosPtr;
+//    float * m_dPosYPtr;
+//    float * m_dPosZPtr;
 
     // stores boids velocity
-    thrust::device_vector<float> m_dVelX;
-    thrust::device_vector<float> m_dVelY;
-    thrust::device_vector<float> m_dVelZ;
+    thrust::device_vector<float3> m_dVel;
+//    thrust::device_vector<float> m_dVelY;
+//    thrust::device_vector<float> m_dVelZ;
 
-    float * m_dVelX_ptr;
-    float * m_dVelY_ptr;
-    float * m_dVelZ_ptr;
+    float3 * m_dVelPtr;
+//    float * m_dVelYPtr;
+//    float * m_dVelZPtr;
+
+    thrust::device_vector<float3> m_dTarget;
+    float3 * m_dTargetPtr;
+    thrust::device_vector<float3> m_dSteer;
+    float3 * m_dSteerPtr;
 };
 
 #endif // FLOCKGPU_H
