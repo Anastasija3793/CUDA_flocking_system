@@ -26,22 +26,28 @@ private:
     int m_numBoids;
 
     // stores boids x,y,z, position //float3?
-    thrust::device_vector<float3> m_dPos;
-//    thrust::device_vector<float> m_dPosY;
-//    thrust::device_vector<float> m_dPosZ;
+//    thrust::device_vector<float3> m_dPos;
+    thrust::device_vector<float> m_dPosX;
+    thrust::device_vector<float> m_dPosY;
+    thrust::device_vector<float> m_dPosZ;
 
-    float3 * m_dPosPtr;
-//    float * m_dPosYPtr;
-//    float * m_dPosZPtr;
+//    float3 * m_dPosPtr;
+    float * m_dPosXPtr;
+    float * m_dPosYPtr;
+    float * m_dPosZPtr;
+
+    //float m_dPos;
 
     // stores boids velocity
-    thrust::device_vector<float3> m_dVel;
-//    thrust::device_vector<float> m_dVelY;
-//    thrust::device_vector<float> m_dVelZ;
+//    thrust::device_vector<float3> m_dVel;
+    thrust::device_vector<float> m_dVelX;
+    thrust::device_vector<float> m_dVelY;
+    thrust::device_vector<float> m_dVelZ;
 
-    float3 * m_dVelPtr;
-//    float * m_dVelYPtr;
-//    float * m_dVelZPtr;
+//    float3 * m_dVelPtr;
+    float * m_dVelXPtr;
+    float * m_dVelYPtr;
+    float * m_dVelZPtr;
 
     thrust::device_vector<float3> m_dTarget;
     float3 * m_dTargetPtr;
