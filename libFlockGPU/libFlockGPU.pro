@@ -36,10 +36,12 @@ CONFIG-=app_bundle
 #          $$PWD/src/FlockGPU.cu
 
 CUDA_SOURCES += $$PWD/src/FlockGPU.cu \
+                $$PWD/src/Debug.cu \
                 $$PWD/src/main.cu
 #                $$PWD/src/BoidGPU.cu
 # same for the .h files
 HEADERS+= $$PWD/include/FlockGPU.cuh \
+          $$PWD/include/Debug.cuh \
           $$PWD/include/BoidGPUKernels.cuh 
 #          $$PWD/include/libFlockGPU.h
 #          $$PWD/include/BoidGPU.cuh

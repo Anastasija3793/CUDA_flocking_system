@@ -21,6 +21,17 @@
 
 #define NUM_BOIDS 100
 
+__global__ void updateKernel(float3 * _pos, const float3 * _vel)
+{
+    uint idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if(idx<NUM_BOIDS)
+    {
+        _pos[idx]+=_vel[idx];
+    }
+}
+
+
 //__global__ void updateKernel(float * _posX, float * _posY, float * _posZ, const float * _velX, const float * _velY, const float * _velZ)
 //{
 //    uint idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -32,19 +43,6 @@
 //        _posZ[idx]+=_velZ[idx];
 //    }
 //}
-
-
-__global__ void updateKernel(float * _posX, float * _posY, float * _posZ, const float * _velX, const float * _velY, const float * _velZ)
-{
-    uint idx = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if(idx<NUM_BOIDS)
-    {
-        _posX[idx]+=_velX[idx];
-        _posY[idx]+=_velY[idx];
-        _posZ[idx]+=_velZ[idx];
-    }
-}
 
 
 

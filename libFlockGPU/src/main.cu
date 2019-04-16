@@ -4,6 +4,7 @@
 #include <sys/time.h>
 //#include "Flock.h"
 //#include "libFlockGPU.h"
+#include "Debug.cuh"
 #include "FlockGPU.cuh"
 
 int main()
