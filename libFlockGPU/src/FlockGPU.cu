@@ -20,10 +20,10 @@ FlockGPU::FlockGPU(int _numBoids)
     m_numBoids=_numBoids;
 
     m_dPosX.resize(m_numBoids);
-    m_dPosY.resize(m_numBoids);
+//    m_dPosY.resize(m_numBoids);
     m_dPosZ.resize(m_numBoids);
     m_dVelX.resize(m_numBoids);
-    m_dVelY.resize(m_numBoids);
+//    m_dVelY.resize(m_numBoids);
     m_dVelZ.resize(m_numBoids);
     //m_dTarget.resize(m_numBoids);
     //m_dSteer.resize(m_numBoids);
@@ -32,26 +32,31 @@ FlockGPU::FlockGPU(int _numBoids)
     //makefloat3?
     // check how to access x from float3! (or instead float3 - create float posx, posy, posz?)
 
-    thrust::device_vector<float> randPos(NUM_BOIDS*6);
+    thrust::device_vector<float> randPos(NUM_BOIDS*4);
     float * randPosPtr = thrust::raw_pointer_cast(&randPos[0]);
-    randFloats(randPosPtr, NUM_BOIDS*6);
+    randFloats(randPosPtr, NUM_BOIDS*4);
 
 
+//    m_dPosX.assign(randPos.begin(), randPos.begin() + NUM_BOIDS);
+//    m_dPosY.assign(randPos.begin() + NUM_BOIDS, randPos.begin() + 2*NUM_BOIDS);
+//    m_dPosZ.assign(randPos.begin() + 2*NUM_BOIDS, randPos.begin() + 3*NUM_BOIDS);
+
+//    m_dVelX.assign(randPos.begin() + 3*NUM_BOIDS, randPos.begin() + 4*NUM_BOIDS);
+//    m_dVelY.assign(randPos.begin() + 4*NUM_BOIDS, randPos.begin() + 5*NUM_BOIDS);
+//    m_dVelZ.assign(randPos.begin() + 5*NUM_BOIDS, randPos.begin() + 6*NUM_BOIDS);
     m_dPosX.assign(randPos.begin(), randPos.begin() + NUM_BOIDS);
-    m_dPosY.assign(randPos.begin() + NUM_BOIDS, randPos.begin() + 2*NUM_BOIDS);
-    m_dPosZ.assign(randPos.begin() + 2*NUM_BOIDS, randPos.begin() + 3*NUM_BOIDS);
+    m_dPosZ.assign(randPos.begin() + NUM_BOIDS, randPos.begin() + 2*NUM_BOIDS);
 
-    m_dVelX.assign(randPos.begin() + 3*NUM_BOIDS, randPos.begin() + 4*NUM_BOIDS);
-    m_dVelY.assign(randPos.begin() + 4*NUM_BOIDS, randPos.begin() + 5*NUM_BOIDS);
-    m_dVelZ.assign(randPos.begin() + 5*NUM_BOIDS, randPos.begin() + 6*NUM_BOIDS);
+    m_dVelX.assign(randPos.begin() + 2*NUM_BOIDS, randPos.begin() + 3*NUM_BOIDS);
+    m_dVelZ.assign(randPos.begin() + 3*NUM_BOIDS, randPos.begin() + 4*NUM_BOIDS);
 
 
     m_dPosXPtr = thrust::raw_pointer_cast(&m_dPosX[0]);
-    m_dPosYPtr = thrust::raw_pointer_cast(&m_dPosY[0]);
+//    m_dPosYPtr = thrust::raw_pointer_cast(&m_dPosY[0]);
     m_dPosZPtr = thrust::raw_pointer_cast(&m_dPosZ[0]);
 
     m_dVelXPtr = thrust::raw_pointer_cast(&m_dVelX[0]);
-    m_dVelYPtr = thrust::raw_pointer_cast(&m_dVelY[0]);
+//    m_dVelYPtr = thrust::raw_pointer_cast(&m_dVelY[0]);
     m_dVelZPtr = thrust::raw_pointer_cast(&m_dVelZ[0]);
 
 
@@ -89,13 +94,13 @@ void FlockGPU::update()
     //thrust::fill(m_dTarget.begin(), m_dTarget.begin()+m_numBoids,0);
 
     //float3 pos = make_float3(m_dPosXPtr,m_dPosYPtr,m_dPosZPtr);
-    float3 pos;
-    pos.x = m_dPosXPtr;
+//    float3 pos;
+//    pos.x = m_dPosXPtr;
 
     //steerKernel<<<N,M>>>(m_dPosPtr,m_dVelPtr,m_dTargetPtr,m_dTargetPtr);
     //cudaThreadSynchronize();
-//    updateKernel<<<N,M>>>(m_dPosPtr,m_dVelPtr);
-//    cudaThreadSynchronize();
+    updateKernel<<<N,M>>>(m_dPosXPtr,m_dPosZPtr,m_dVelXPtr,m_dVelZPtr);
+    cudaThreadSynchronize();
 
 }
 
@@ -124,56 +129,56 @@ int FlockGPU::randFloats(float *&devData, const size_t n)
     return EXIT_SUCCESS;
 }
 
-//void FlockGPU::dumpGeo(uint _frameNumber)
-//{
-//    char fname[150];
+void FlockGPU::dumpGeo(uint _frameNumber)
+{
+    char fname[150];
 
-//    std::sprintf(fname,"geo/flock_gpu.%03d.geo",++_frameNumber);
-//    // we will use a stringstream as it may be more efficient
-//    std::stringstream ss;
-//    std::ofstream file;
-//    file.open(fname);
-//    if (!file.is_open())
-//    {
-//        std::cerr << "failed to Open file "<<fname<<'\n';
-//        exit(EXIT_FAILURE);
-//    }
-//    // write header see here http://www.sidefx.com/docs/houdini15.0/io/formats/geo
-//    ss << "PGEOMETRY V5\n";
-//    ss << "NPoints " << m_numBoids << " NPrims 1\n";
-//    ss << "NPointGroups 0 NPrimGroups 1\n";
-//    // this is hard coded but could be flexible we have 1 attrib which is Colour
-//    ss << "NPointAttrib 1  NVertexAttrib 0 NPrimAttrib 2 NAttrib 0\n";
-//    // now write out our point attrib this case Cd for diffuse colour
-//    ss <<"PointAttrib \n";
-//    // default the colour to white
-//    ss <<"Cd 3 float 1 1 1\n";
-//    // now we write out the particle data in the format
-//    // x y z 1 (attrib so in this case colour)
-//    for(unsigned int i=0; i<m_numBoids; ++i)
-//    {
+    std::sprintf(fname,"geo/flock_gpu.%03d.geo",++_frameNumber);
+    // we will use a stringstream as it may be more efficient
+    std::stringstream ss;
+    std::ofstream file;
+    file.open(fname);
+    if (!file.is_open())
+    {
+        std::cerr << "failed to Open file "<<fname<<'\n';
+        exit(EXIT_FAILURE);
+    }
+    // write header see here http://www.sidefx.com/docs/houdini15.0/io/formats/geo
+    ss << "PGEOMETRY V5\n";
+    ss << "NPoints " << m_numBoids << " NPrims 1\n";
+    ss << "NPointGroups 0 NPrimGroups 1\n";
+    // this is hard coded but could be flexible we have 1 attrib which is Colour
+    ss << "NPointAttrib 1  NVertexAttrib 0 NPrimAttrib 2 NAttrib 0\n";
+    // now write out our point attrib this case Cd for diffuse colour
+    ss <<"PointAttrib \n";
+    // default the colour to white
+    ss <<"Cd 3 float 1 1 1\n";
+    // now we write out the particle data in the format
+    // x y z 1 (attrib so in this case colour)
+    for(unsigned int i=0; i<m_numBoids; ++i)
+    {
 
 
-//        ss<<m_dPos.x[i]<<" "<<m_dPos.y[i]<<" "<<m_dPos.z[i] << " 1 ";
-//        //ss<<"("<<_boids[i].cellCol.x<<" "<<_boids[i].cellCol.y<<" "<< _boids[i].cellCol.z<<")\n";
-//        ss<<"("<<std::abs(1)<<" "<<std::abs(1)<<" "<<std::abs(1)<<")\n";
-//    }
+        ss<<m_dPosX[i]<<" "<<0<<" "<<m_dPosZ[i] << " 1 ";
+        //ss<<"("<<_boids[i].cellCol.x<<" "<<_boids[i].cellCol.y<<" "<< _boids[i].cellCol.z<<")\n";
+        ss<<"("<<std::abs(1)<<" "<<std::abs(1)<<" "<<std::abs(1)<<")\n";
+    }
 
-//    // now write out the index values
-//    ss<<"PrimitiveAttrib\n";
-//    ss<<"generator 1 index 1 location1\n";
-//    ss<<"dopobject 1 index 1 /obj/AutoDopNetwork:1\n";
-//    ss<<"Part "<<m_numBoids<<" ";
-//    for(size_t i=0; i<m_numBoids; ++i)
-//    {
-//        ss<<i<<" ";
-//    }
-//    ss<<" [0	0]\n";
-//    ss<<"box_object1 unordered\n";
-//    ss<<"1 1\n";
-//    ss<<"beginExtra\n";
-//    ss<<"endExtra\n";
-//    // dump string stream to disk;
-//    file<<ss.rdbuf();
-//    file.close();
-//}
+    // now write out the index values
+    ss<<"PrimitiveAttrib\n";
+    ss<<"generator 1 index 1 location1\n";
+    ss<<"dopobject 1 index 1 /obj/AutoDopNetwork:1\n";
+    ss<<"Part "<<m_numBoids<<" ";
+    for(size_t i=0; i<m_numBoids; ++i)
+    {
+        ss<<i<<" ";
+    }
+    ss<<" [0	0]\n";
+    ss<<"box_object1 unordered\n";
+    ss<<"1 1\n";
+    ss<<"beginExtra\n";
+    ss<<"endExtra\n";
+    // dump string stream to disk;
+    file<<ss.rdbuf();
+    file.close();
+}

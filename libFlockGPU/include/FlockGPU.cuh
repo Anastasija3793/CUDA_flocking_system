@@ -28,12 +28,12 @@ private:
     // stores boids x,y,z, position //float3?
 //    thrust::device_vector<float3> m_dPos;
     thrust::device_vector<float> m_dPosX;
-    thrust::device_vector<float> m_dPosY;
+//    thrust::device_vector<float> m_dPosY;
     thrust::device_vector<float> m_dPosZ;
 
 //    float3 * m_dPosPtr;
     float * m_dPosXPtr;
-    float * m_dPosYPtr;
+//    float * m_dPosYPtr;
     float * m_dPosZPtr;
 
     //float m_dPos;
@@ -41,18 +41,18 @@ private:
     // stores boids velocity
 //    thrust::device_vector<float3> m_dVel;
     thrust::device_vector<float> m_dVelX;
-    thrust::device_vector<float> m_dVelY;
+//    thrust::device_vector<float> m_dVelY;
     thrust::device_vector<float> m_dVelZ;
 
 //    float3 * m_dVelPtr;
     float * m_dVelXPtr;
-    float * m_dVelYPtr;
+//    float * m_dVelYPtr;
     float * m_dVelZPtr;
 
-    thrust::device_vector<float3> m_dTarget;
-    float3 * m_dTargetPtr;
-    thrust::device_vector<float3> m_dSteer;
-    float3 * m_dSteerPtr;
+//    thrust::device_vector<float3> m_dTarget;
+//    float3 * m_dTargetPtr;
+//    thrust::device_vector<float3> m_dSteer;
+//    float3 * m_dSteerPtr;
 };
 
 #endif // FLOCKGPU_H
