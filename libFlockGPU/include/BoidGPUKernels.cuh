@@ -34,13 +34,14 @@
 //}
 
 
-__global__ void updateKernel(float * _posX, float * _posZ, const float * _velX, const float * _velZ)
+__global__ void updateKernel(float * _posX, float * _posY, float * _posZ, const float * _velX, const float * _velY, const float * _velZ)
 {
     uint idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     if(idx<NUM_BOIDS)
     {
         _posX[idx]+=_velX[idx];
+        _posY[idx]+=_velY[idx];
         _posZ[idx]+=_velZ[idx];
     }
 }

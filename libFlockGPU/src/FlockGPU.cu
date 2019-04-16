@@ -20,10 +20,10 @@ FlockGPU::FlockGPU(int _numBoids)
     m_numBoids=_numBoids;
 
     m_dPosX.resize(m_numBoids);
-//    m_dPosY.resize(m_numBoids);
+    m_dPosY.resize(m_numBoids);
     m_dPosZ.resize(m_numBoids);
     m_dVelX.resize(m_numBoids);
-//    m_dVelY.resize(m_numBoids);
+    m_dVelY.resize(m_numBoids);
     m_dVelZ.resize(m_numBoids);
     //m_dTarget.resize(m_numBoids);
     //m_dSteer.resize(m_numBoids);
@@ -32,31 +32,32 @@ FlockGPU::FlockGPU(int _numBoids)
     //makefloat3?
     // check how to access x from float3! (or instead float3 - create float posx, posy, posz?)
 
-    thrust::device_vector<float> randPos(NUM_BOIDS*4);
+    thrust::device_vector<float> randPos(NUM_BOIDS*6);
     float * randPosPtr = thrust::raw_pointer_cast(&randPos[0]);
-    randFloats(randPosPtr, NUM_BOIDS*4);
+    randFloats(randPosPtr, NUM_BOIDS*6);
 
+
+    m_dPosX.assign(randPos.begin(), randPos.begin() + NUM_BOIDS);
+    m_dPosY.assign(randPos.begin() + NUM_BOIDS, randPos.begin() + 2*NUM_BOIDS);
+    m_dPosZ.assign(randPos.begin() + 2*NUM_BOIDS, randPos.begin() + 3*NUM_BOIDS);
+
+    m_dVelX.assign(randPos.begin() + 3*NUM_BOIDS, randPos.begin() + 4*NUM_BOIDS);
+    m_dVelY.assign(randPos.begin() + 4*NUM_BOIDS, randPos.begin() + 5*NUM_BOIDS);
+    m_dVelZ.assign(randPos.begin() + 5*NUM_BOIDS, randPos.begin() + 6*NUM_BOIDS);
 
 //    m_dPosX.assign(randPos.begin(), randPos.begin() + NUM_BOIDS);
-//    m_dPosY.assign(randPos.begin() + NUM_BOIDS, randPos.begin() + 2*NUM_BOIDS);
-//    m_dPosZ.assign(randPos.begin() + 2*NUM_BOIDS, randPos.begin() + 3*NUM_BOIDS);
+//    m_dPosZ.assign(randPos.begin() + NUM_BOIDS, randPos.begin() + 2*NUM_BOIDS);
 
-//    m_dVelX.assign(randPos.begin() + 3*NUM_BOIDS, randPos.begin() + 4*NUM_BOIDS);
-//    m_dVelY.assign(randPos.begin() + 4*NUM_BOIDS, randPos.begin() + 5*NUM_BOIDS);
-//    m_dVelZ.assign(randPos.begin() + 5*NUM_BOIDS, randPos.begin() + 6*NUM_BOIDS);
-    m_dPosX.assign(randPos.begin(), randPos.begin() + NUM_BOIDS);
-    m_dPosZ.assign(randPos.begin() + NUM_BOIDS, randPos.begin() + 2*NUM_BOIDS);
-
-    m_dVelX.assign(randPos.begin() + 2*NUM_BOIDS, randPos.begin() + 3*NUM_BOIDS);
-    m_dVelZ.assign(randPos.begin() + 3*NUM_BOIDS, randPos.begin() + 4*NUM_BOIDS);
+//    m_dVelX.assign(randPos.begin() + 2*NUM_BOIDS, randPos.begin() + 3*NUM_BOIDS);
+//    m_dVelZ.assign(randPos.begin() + 3*NUM_BOIDS, randPos.begin() + 4*NUM_BOIDS);
 
 
     m_dPosXPtr = thrust::raw_pointer_cast(&m_dPosX[0]);
-//    m_dPosYPtr = thrust::raw_pointer_cast(&m_dPosY[0]);
+    m_dPosYPtr = thrust::raw_pointer_cast(&m_dPosY[0]);
     m_dPosZPtr = thrust::raw_pointer_cast(&m_dPosZ[0]);
 
     m_dVelXPtr = thrust::raw_pointer_cast(&m_dVelX[0]);
-//    m_dVelYPtr = thrust::raw_pointer_cast(&m_dVelY[0]);
+    m_dVelYPtr = thrust::raw_pointer_cast(&m_dVelY[0]);
     m_dVelZPtr = thrust::raw_pointer_cast(&m_dVelZ[0]);
 
 
@@ -99,7 +100,7 @@ void FlockGPU::update()
 
     //steerKernel<<<N,M>>>(m_dPosPtr,m_dVelPtr,m_dTargetPtr,m_dTargetPtr);
     //cudaThreadSynchronize();
-    updateKernel<<<N,M>>>(m_dPosXPtr,m_dPosZPtr,m_dVelXPtr,m_dVelZPtr);
+    updateKernel<<<N,M>>>(m_dPosXPtr,m_dPosYPtr,m_dPosZPtr,m_dVelXPtr,m_dVelYPtr,m_dVelZPtr);
     cudaThreadSynchronize();
 
 }
@@ -159,7 +160,7 @@ void FlockGPU::dumpGeo(uint _frameNumber)
     {
 
 
-        ss<<m_dPosX[i]<<" "<<0<<" "<<m_dPosZ[i] << " 1 ";
+        ss<<m_dPosX[i]<<" "<<m_dPosY[i]<<" "<<m_dPosZ[i] << " 1 ";
         //ss<<"("<<_boids[i].cellCol.x<<" "<<_boids[i].cellCol.y<<" "<< _boids[i].cellCol.z<<")\n";
         ss<<"("<<std::abs(1)<<" "<<std::abs(1)<<" "<<std::abs(1)<<")\n";
     }
