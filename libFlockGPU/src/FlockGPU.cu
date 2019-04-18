@@ -17,129 +17,13 @@
 #include <thrust/functional.h>
 #include <thrust/transform.h>
 #include <thrust/iterator/zip_iterator.h>
+#include <thrust/iterator/counting_iterator.h>
 #include <thrust/random.h>
 
 //for rand
 #define CURAND_CALL(x) do { if((x)!=CURAND_STATUS_SUCCESS) { \
     printf("Error at %s:%d\n",__FILE__,__LINE__);\
 return EXIT_FAILURE;}} while(0)
-
-//---------------------VERSION1------------TEST------------START----------------------------
-//struct random_float3
-//{
-//    __host__ __device__ float3 operator()(float3 v)
-//    {
-//        float x = v.x;
-//        float y = v.y;
-//        float z = v.z;
-
-//        float randX = x*0.5;
-//        float randY = y*0.2;
-//        float randZ = z*0.7;
-//        return make_float3(randX,randY,randZ);
-//    }
-//};
-////for exporting geo
-//struct getX
-//{
-//    __host__ __device__ float operator()(float3 g)
-//    {
-//        float x = g.x;
-//        return x;
-//    }
-
-//};
-//struct getY
-//{
-//    __host__ __device__ float operator()(float3 g)
-//    {
-//        float y = g.y;
-//        return y;
-//    }
-
-//};
-//struct getZ
-//{
-//    __host__ __device__ float operator()(float3 g)
-//    {
-//        float z = g.z;
-//        return z;
-//    }
-
-//};
-
-
-//FlockGPU::FlockGPU(int _numBoids)
-//{
-//    m_numBoids=_numBoids;
-
-//    m_dPos.resize(m_numBoids);
-//    m_dVel.resize(m_numBoids);
-//    m_dPosX.resize(m_numBoids);
-////    m_dPosY.resize(m_numBoids);
-////    m_dPosZ.resize(m_numBoids);
-////    m_dVelX.resize(m_numBoids);
-////    m_dVelY.resize(m_numBoids);
-////    m_dVelZ.resize(m_numBoids);
-//    //m_dTarget.resize(m_numBoids);
-//    //m_dSteer.resize(m_numBoids);
-
-//    //thrust::device_vector<float>m_dPosX = m_dPos.m_x;
-//    //makefloat3?
-//    // check how to access x from float3! (or instead float3 - create float posx, posy, posz?)
-
-////    thrust::device_vector<float> randPos(NUM_BOIDS);//NUM_BOIDS*6
-////    float * randPosPtr = thrust::raw_pointer_cast(&randPos[0]);
-////    randFloats(randPosPtr, NUM_BOIDS);
-
-
-//    thrust::transform(m_dPos.begin(),m_dPos.begin()+NUM_BOIDS,m_dPos.begin(),random_float3());
-//    thrust::transform(m_dVel.begin(),m_dVel.begin()+2*NUM_BOIDS,m_dVel.begin(),random_float3());
-
-
-////    m_dPosPtr = thrust::raw_pointer_cast(&m_dPos[0]);
-////    m_dVelPtr = thrust::raw_pointer_cast(&m_dVel[0]);
-
-//    m_dPosPtr = thrust::raw_pointer_cast(m_dPos.data());
-//    m_dVelPtr = thrust::raw_pointer_cast(m_dVel.data());
-
-
-//    thrust::transform(m_dPos.begin(),m_dPos.begin()+3*NUM_BOIDS,getposX.begin(),getX());
-//    thrust::transform(m_dPos.begin(),m_dPos.begin()+4*NUM_BOIDS,getposY.begin(),getY());
-//    thrust::transform(m_dPos.begin(),m_dPos.begin()+5*NUM_BOIDS,getposZ.begin(),getZ());
-////    m_dPosX.assign(randPos.begin(), randPos.begin() + NUM_BOIDS);
-////    m_dPosY.assign(randPos.begin() + NUM_BOIDS, randPos.begin() + 2*NUM_BOIDS);
-////    m_dPosZ.assign(randPos.begin() + 2*NUM_BOIDS, randPos.begin() + 3*NUM_BOIDS);
-
-////    m_dVelX.assign(randPos.begin() + 3*NUM_BOIDS, randPos.begin() + 4*NUM_BOIDS);
-////    m_dVelY.assign(randPos.begin() + 4*NUM_BOIDS, randPos.begin() + 5*NUM_BOIDS);
-////    m_dVelZ.assign(randPos.begin() + 5*NUM_BOIDS, randPos.begin() + 6*NUM_BOIDS);
-
-//    //---------------------------TEST------------------------------------------------
-////    m_dPosX.assign(randPos.begin(), randPos.begin() + NUM_BOIDS);
-////    m_dPosZ.assign(randPos.begin() + NUM_BOIDS, randPos.begin() + 2*NUM_BOIDS);
-
-////    m_dVelX.assign(randPos.begin() + 2*NUM_BOIDS, randPos.begin() + 3*NUM_BOIDS);
-////    m_dVelZ.assign(randPos.begin() + 3*NUM_BOIDS, randPos.begin() + 4*NUM_BOIDS);
-//    //-------------------------------------------------------------------------------
-
-
-////    m_dPosXPtr = thrust::raw_pointer_cast(m_dPosX.data());
-////    m_dPosYPtr = thrust::raw_pointer_cast(&m_dPosY[0]);
-////    m_dPosZPtr = thrust::raw_pointer_cast(&m_dPosZ[0]);
-
-////    m_dVelXPtr = thrust::raw_pointer_cast(&m_dVelX[0]);
-////    m_dVelYPtr = thrust::raw_pointer_cast(&m_dVelY[0]);
-////    m_dVelZPtr = thrust::raw_pointer_cast(&m_dVelZ[0]);
-
-
-
-
-//    //thrust::make_tuple(randPos);
-
-//}
-//---------------------VERSION1------------TEST------------END------------------------------
-
 
 
 //3-tuple to store 3d vector type
@@ -157,12 +41,31 @@ struct get3dVec
     }
 };
 
+//struct random_float3
+//{
+//    __host__ __device__ float3 operator()(float3 v)
+//    {
+//        thrust::device_vector <float> tmp_PosPnts(NUM_BOIDS);
+//        float * tmp_PosPnts_ptr = thrust::raw_pointer_cast(&tmp_PosPnts[0]);
+//        randFloats(tmp_PosPnts_ptr, NUM_BOIDS);
+
+//        float x = v.x;
+//        float y = v.y;
+//        float z = v.z;
+
+//        float randX = x*tmp_PosPnts;
+//        float randY = y*tmp_PosPnts;
+//        float randZ = z*tmp_PosPnts;
+//        return make_float3(randX,randY,randZ);
+//    }
+//};
+
 // Return a host vector with random values in the range [0,1)
 thrust::host_vector<float> random_vector(const size_t N,
                                          unsigned int seed = thrust::default_random_engine::default_seed)
 {
     thrust::default_random_engine rng(seed);
-    thrust::uniform_real_distribution<float> u01(0.0f, 1.0f);
+    thrust::uniform_real_distribution<float> u01(-1.0f, 1.0f);//0,1
     thrust::host_vector<float> temp(N);
     for(size_t i = 0; i < N; i++) {
         temp[i] = u01(rng);
@@ -184,6 +87,23 @@ FlockGPU::FlockGPU(int _numBoids)
     m_dVelY.resize(m_numBoids);
     m_dVelZ.resize(m_numBoids);
 
+    m_pos.resize(m_numBoids);
+    xTest.resize(m_numBoids);
+    yTest.resize(m_numBoids);
+    zTest.resize(m_numBoids);
+
+    thrust::device_vector <float> myrand(NUM_BOIDS*3);
+    //float * myrand_ptr = thrust::raw_pointer_cast(&myrand[0]);
+    //randFloats(myrand_ptr, NUM_BOIDS*3);
+
+
+//    myrand=random_vector(m_numBoids);
+//    for(int i =0; i<m_numBoids; i++)
+//    {
+//        m_dPos=make_float3(myrand);
+//    }
+
+
     m_dPosX=random_vector(m_numBoids);
     m_dPosY=random_vector(m_numBoids);
     m_dPosZ=random_vector(m_numBoids);
@@ -191,6 +111,11 @@ FlockGPU::FlockGPU(int _numBoids)
     m_dVelX=random_vector(m_numBoids);
     m_dVelY=random_vector(m_numBoids);
     m_dVelZ=random_vector(m_numBoids);
+
+
+
+
+//    make_float3(tmp_PosPnts,tmp_PosPnts,tmp_PosPnts);
 
 //    typedef thrust::device_vector<float>::iterator                     FloatIterator;
 //    typedef thrust::tuple<FloatIterator, FloatIterator, FloatIterator> FloatIteratorTuple;
@@ -204,6 +129,7 @@ FlockGPU::FlockGPU(int _numBoids)
 //    thrust::transform(pos_first, pos_last, m_dPos.begin(), get3dVec());
 //    thrust::transform(vel_first, vel_last, m_dVel.begin(), get3dVec());
 
+
     thrust::transform(thrust::make_zip_iterator(make_tuple(m_dPosX.begin(), m_dPosY.begin(), m_dPosZ.begin())),
                       thrust::make_zip_iterator(make_tuple(m_dPosX.end(),   m_dPosY.end(),   m_dPosZ.end())),
                       m_dPos.begin(),
@@ -213,12 +139,11 @@ FlockGPU::FlockGPU(int _numBoids)
                       m_dVel.begin(),
                       get3dVec());
 
+    m_dPosPtr = thrust::raw_pointer_cast(&m_dPos[0]);
+    m_dVelPtr = thrust::raw_pointer_cast(&m_dVel[0]);
 
-//    m_dPosPtr = thrust::raw_pointer_cast(&m_dPos[0]);
-//    m_dVelPtr = thrust::raw_pointer_cast(&m_dVel[0]);
-
-    m_dPosPtr = thrust::raw_pointer_cast(m_dPos.data());
-    m_dVelPtr = thrust::raw_pointer_cast(m_dVel.data());
+//    m_dPosPtr = thrust::raw_pointer_cast(m_dPos.data());
+//    m_dVelPtr = thrust::raw_pointer_cast(m_dVel.data());
 }
 
 FlockGPU::~FlockGPU()
@@ -236,16 +161,25 @@ void FlockGPU::update()
     //thrust::fill(m_dTarget.begin(), m_dTarget.begin()+m_numBoids,0);
     //thrust::fill(m_dPosPtr,m_dPosPtr + m_numBoids,0);
 
-    //float3 pos = make_float3(m_dPosXPtr,m_dPosYPtr,m_dPosZPtr);
-//    float3 pos;
-//    pos.x = m_dPosXPtr;
-
     //steerKernel<<<N,M>>>(m_dPosPtr,m_dVelPtr,m_dTargetPtr,m_dTargetPtr);
     //cudaThreadSynchronize();
-//    updateKernel<<<N,M>>>(m_dPosXPtr,m_dPosYPtr,m_dPosZPtr,m_dVelXPtr,m_dVelYPtr,m_dVelZPtr);
-//    cudaThreadSynchronize();
+
     updateKernel<<<N,M>>>(m_dPosPtr,m_dVelPtr);
     cudaThreadSynchronize();
+
+    thrust::copy(m_dPos.begin(),m_dPos.end(),m_pos.begin());
+
+    //print
+//    thrust::copy(m_dPosX.begin(),m_dPosX.end(),xTest.begin());
+//    thrust::copy(m_dPosY.begin(),m_dPosY.end(),yTest.begin());
+//    thrust::copy(m_dPosZ.begin(),m_dPosZ.end(),zTest.begin());
+//    std::cout<<"x: "<<m_pos[0].x<<'\n';
+//    std::cout<<"y: "<<m_pos[0].y<<'\n';
+//    std::cout<<"z: "<<m_pos[0].z<<'\n';
+//    std::cout<<"x: "<<xTest[0]<<'\n';
+//    std::cout<<"y: "<<yTest[0]<<'\n';
+//    std::cout<<"z: "<<zTest[0]<<'\n';
+//    printf("%d \n", m_dPosX[0]);
 
 }
 
@@ -304,7 +238,7 @@ void FlockGPU::dumpGeo(uint _frameNumber)
     {
 
 
-        ss<<m_dPosX[i]<<" "<<m_dPosY[i]<<" "<<m_dPosZ[i] << " 1 ";
+        ss<<m_pos[i].x<<" "<<m_pos[i].y<<" "<<m_pos[i].z << " 1 ";
         //ss<<"("<<_boids[i].cellCol.x<<" "<<_boids[i].cellCol.y<<" "<< _boids[i].cellCol.z<<")\n";
         ss<<"("<<std::abs(1)<<" "<<std::abs(1)<<" "<<std::abs(1)<<")\n";
     }

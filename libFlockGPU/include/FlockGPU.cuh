@@ -40,7 +40,10 @@ private:
 //    thrust::device_vector<float> getposZ;
 //    float * m_dPosYPtr;
 //    float * m_dPosZPtr;
-
+    std::vector<float3> m_pos;
+    std::vector<float> xTest;
+    std::vector<float> yTest;
+    std::vector<float> zTest;
     //float m_dPos;
 
     // stores boids velocity
