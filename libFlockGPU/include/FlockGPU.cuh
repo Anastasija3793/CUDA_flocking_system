@@ -57,6 +57,15 @@ private:
 //    float * m_dVelYPtr;
 //    float * m_dVelZPtr;
 
+    thrust::device_vector<float3> m_dSep;
+    //test
+    thrust::device_vector<float> m_dSepX;
+    thrust::device_vector<float> m_dSepY;
+    thrust::device_vector<float> m_dSepZ;
+
+    float3 * m_dSepPtr;
+    std::vector<float3> m_sep;
+
 //    thrust::device_vector<float3> m_dTarget;
 //    float3 * m_dTargetPtr;
 //    thrust::device_vector<float3> m_dSteer;

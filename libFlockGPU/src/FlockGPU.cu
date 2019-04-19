@@ -41,39 +41,37 @@ struct get3dVec
     }
 };
 
-//struct random_float3
-//{
-//    __host__ __device__ float3 operator()(float3 v)
-//    {
-//        thrust::device_vector <float> tmp_PosPnts(NUM_BOIDS);
-//        float * tmp_PosPnts_ptr = thrust::raw_pointer_cast(&tmp_PosPnts[0]);
-//        randFloats(tmp_PosPnts_ptr, NUM_BOIDS);
-
-//        float x = v.x;
-//        float y = v.y;
-//        float z = v.z;
-
-//        float randX = x*tmp_PosPnts;
-//        float randY = y*tmp_PosPnts;
-//        float randZ = z*tmp_PosPnts;
-//        return make_float3(randX,randY,randZ);
-//    }
-//};
-
 // Return a host vector with random values in the range [0,1)
-thrust::host_vector<float> random_vector(const size_t N,
-                                         unsigned int seed = thrust::default_random_engine::default_seed)
-{
-    thrust::default_random_engine rng(seed);
-    thrust::uniform_real_distribution<float> u01(-1.0f, 1.0f);//0,1
-    thrust::host_vector<float> temp(N);
-    for(size_t i = 0; i < N; i++) {
-        temp[i] = u01(rng);
-    }
-    return temp;
-}
+//thrust::host_vector<float> random_vector(const size_t N,
+//                                         unsigned int seed = thrust::default_random_engine::default_seed)
+//{
+//    thrust::default_random_engine rng(seed);
+//    thrust::uniform_real_distribution<float> u01(-1.0f, 1.0f);//0,1
+//    thrust::host_vector<float> temp(N);
+//    for(size_t i = 0; i < N; i++) {
+//        temp[i] = u01(rng);
+//    }
+//    return temp;
+//}
 
-FlockGPU::FlockGPU(int _numBoids)
+// random generator
+struct randGen {
+    int maxVal;
+    randGen(int max) :
+            maxVal(max) {
+    }
+
+    int operator()() {
+        return rand() % maxVal;
+    }
+};
+
+FlockGPU::FlockGPU(int _numBoids)/* : m_numBoids(_numBoids), m_dPos(m_numBoids), m_dPosX(m_numBoids), m_dPosY(m_numBoids), m_dPosZ(m_numBoids),
+    m_dVel(m_numBoids),
+    m_dVelX(m_numBoids),
+    m_dVelY(m_numBoids),
+    m_dVelZ(m_numBoids),
+    m_pos(m_numBoids)*/
 {
     m_numBoids=_numBoids;
 
@@ -92,30 +90,11 @@ FlockGPU::FlockGPU(int _numBoids)
     yTest.resize(m_numBoids);
     zTest.resize(m_numBoids);
 
-    thrust::device_vector <float> myrand(NUM_BOIDS*3);
-    //float * myrand_ptr = thrust::raw_pointer_cast(&myrand[0]);
-    //randFloats(myrand_ptr, NUM_BOIDS*3);
+    m_dSep.resize(m_numBoids);
+    m_dSepX.resize(m_numBoids);
+    m_dSepY.resize(m_numBoids);
+    m_dSepZ.resize(m_numBoids);
 
-
-//    myrand=random_vector(m_numBoids);
-//    for(int i =0; i<m_numBoids; i++)
-//    {
-//        m_dPos=make_float3(myrand);
-//    }
-
-
-    m_dPosX=random_vector(m_numBoids);
-    m_dPosY=random_vector(m_numBoids);
-    m_dPosZ=random_vector(m_numBoids);
-
-    m_dVelX=random_vector(m_numBoids);
-    m_dVelY=random_vector(m_numBoids);
-    m_dVelZ=random_vector(m_numBoids);
-
-
-
-
-//    make_float3(tmp_PosPnts,tmp_PosPnts,tmp_PosPnts);
 
 //    typedef thrust::device_vector<float>::iterator                     FloatIterator;
 //    typedef thrust::tuple<FloatIterator, FloatIterator, FloatIterator> FloatIteratorTuple;
@@ -128,6 +107,28 @@ FlockGPU::FlockGPU(int _numBoids)
 
 //    thrust::transform(pos_first, pos_last, m_dPos.begin(), get3dVec());
 //    thrust::transform(vel_first, vel_last, m_dVel.begin(), get3dVec());
+
+    std::vector<float> randPos(m_numBoids*3);
+//    std::generate(randPos.begin(), randPos.end(), []() {
+//        return rand() % 100;
+//    });
+    std::generate(randPos.begin(), randPos.end(),
+                randGen(100));//500
+
+    std::vector<float> randVel(m_numBoids*3);
+//    std::generate(randVel.begin(), randVel.end(), []() {
+//        return rand() % 100;
+//    });
+    std::generate(randVel.begin(), randVel.end(),
+                randGen(100));
+
+    m_dPosX = randPos;
+    m_dPosY = randPos;
+    m_dPosZ = randPos;
+
+    m_dVelX = randVel;
+    m_dVelY = randVel;
+    m_dVelZ = randVel;
 
 
     thrust::transform(thrust::make_zip_iterator(make_tuple(m_dPosX.begin(), m_dPosY.begin(), m_dPosZ.begin())),
@@ -142,6 +143,8 @@ FlockGPU::FlockGPU(int _numBoids)
     m_dPosPtr = thrust::raw_pointer_cast(&m_dPos[0]);
     m_dVelPtr = thrust::raw_pointer_cast(&m_dVel[0]);
 
+    m_dSepPtr = thrust::raw_pointer_cast(&m_dSep[0]);
+
 //    m_dPosPtr = thrust::raw_pointer_cast(m_dPos.data());
 //    m_dVelPtr = thrust::raw_pointer_cast(m_dVel.data());
 }
@@ -153,16 +156,34 @@ FlockGPU::~FlockGPU()
 
 void FlockGPU::update()
 {
-
     //N - blocks; M - threads
     unsigned int M = 1024;
     unsigned int N = m_numBoids/M + 1;
 
     //thrust::fill(m_dTarget.begin(), m_dTarget.begin()+m_numBoids,0);
-    //thrust::fill(m_dPosPtr,m_dPosPtr + m_numBoids,0);
 
     //steerKernel<<<N,M>>>(m_dPosPtr,m_dVelPtr,m_dTargetPtr,m_dTargetPtr);
     //cudaThreadSynchronize();
+
+    unsigned int blockN = NUM_BOIDS/32 + 1;
+    dim3 block2(32, 32); // block of (X,Y) threads
+    dim3 grid2(blockN, 1); // grid blockN * blockN blocks
+
+    thrust::fill(m_dSepX.begin(), m_dSepX.begin()+m_numBoids, 0);
+    thrust::fill(m_dSepY.begin(), m_dSepY.begin()+m_numBoids, 0);
+    thrust::fill(m_dSepZ.begin(), m_dSepZ.begin()+m_numBoids, 0);
+    thrust::transform(thrust::make_zip_iterator(make_tuple(m_dSepX.begin(), m_dSepY.begin(), m_dSepZ.begin())),
+                      thrust::make_zip_iterator(make_tuple(m_dSepX.end(),   m_dSepY.end(),   m_dSepZ.end())),
+                      m_dSep.begin(),
+                      get3dVec());
+
+//    thrust::copy(m_dSep.begin(),m_dSep.end(),m_sep.begin());
+    //reset
+//    thrust::fill(m_dSep.begin(), m_dSep.begin()+m_numBoids, 0);
+//    thrust::fill(m_sep[0].x.begin(), m_sep[0].x.begin()+m_numBoids, 0);
+
+    flockKernel<<<grid2,block2>>>(m_dSepPtr,m_dPosPtr,m_dVelPtr);
+    cudaThreadSynchronize();
 
     updateKernel<<<N,M>>>(m_dPosPtr,m_dVelPtr);
     cudaThreadSynchronize();
@@ -183,30 +204,30 @@ void FlockGPU::update()
 
 }
 
-// From: https://github.com/NCCA/cuda_workshops/blob/master/shared/src/random.cu
-/**
- * Fill an array with random floats using the CURAND function.
- * \param devData The chunk of memory you want to fill with floats within the range (0,1]
- * \param n The size of the chunk of data
- */
-int FlockGPU::randFloats(float *&devData, const size_t n)
-{
-    // The generator, used for random numbers
-    curandGenerator_t gen;
+//// From: https://github.com/NCCA/cuda_workshops/blob/master/shared/src/random.cu
+///**
+// * Fill an array with random floats using the CURAND function.
+// * \param devData The chunk of memory you want to fill with floats within the range (0,1]
+// * \param n The size of the chunk of data
+// */
+//int FlockGPU::randFloats(float *&devData, const size_t n)
+//{
+//    // The generator, used for random numbers
+//    curandGenerator_t gen;
 
-    // Create pseudo-random number generator
-    CURAND_CALL(curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT));
+//    // Create pseudo-random number generator
+//    CURAND_CALL(curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT));
 
-    // Set seed to be the current time (note that calls close together will have same seed!)
-    CURAND_CALL(curandSetPseudoRandomGeneratorSeed(gen, time(NULL)));
+//    // Set seed to be the current time (note that calls close together will have same seed!)
+//    CURAND_CALL(curandSetPseudoRandomGeneratorSeed(gen, time(NULL)));
 
-    // Generate n floats on device
-    CURAND_CALL(curandGenerateUniform(gen, devData, n));
+//    // Generate n floats on device
+//    CURAND_CALL(curandGenerateUniform(gen, devData, n));
 
-    // Cleanup
-    CURAND_CALL(curandDestroyGenerator(gen));
-    return EXIT_SUCCESS;
-}
+//    // Cleanup
+//    CURAND_CALL(curandDestroyGenerator(gen));
+//    return EXIT_SUCCESS;
+//}
 
 void FlockGPU::dumpGeo(uint _frameNumber)
 {
