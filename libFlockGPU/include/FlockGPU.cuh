@@ -64,7 +64,13 @@ private:
     thrust::device_vector<float> m_dSepZ;
 
     float3 * m_dSepPtr;
-    std::vector<float3> m_sep;
+//    std::vector<float3> m_sep;
+
+    thrust::device_vector<float3> m_dCoh;
+    thrust::device_vector<float> m_dCohX;
+    thrust::device_vector<float> m_dCohY;
+    thrust::device_vector<float> m_dCohZ;
+    float3 * m_dCohPtr;
 
 //    thrust::device_vector<float3> m_dTarget;
 //    float3 * m_dTargetPtr;

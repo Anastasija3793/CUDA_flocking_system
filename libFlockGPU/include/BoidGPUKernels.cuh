@@ -163,7 +163,62 @@ __device__ void separateKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
     seekKernel(_pos,_vel,_sepVec,_sepVec);
 }
 
-__global__ void flockKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
+__device__ void cohesionKernel(float3 * _cohVec, float3 * _pos, float3 * _vel)
+{
+    float cohVecLength[NUM_BOIDS];
+
+    // for checking distance
+    __shared__ float3 _dist[NUM_BOIDS];
+
+    //count of neighbours
+    __shared__ unsigned int count[NUM_BOIDS];
+    float distLength[NUM_BOIDS];
+
+    float max_speed = 50.0; //1.0
+    float max_force = 5.0; //0.03
+
+    // for current boid
+    uint idx = blockIdx.x * blockDim.x + threadIdx.x;
+    // for current boid's neighbours
+    uint idy = blockIdx.y * blockDim.y + threadIdx.y;
+
+    count[idx] = 0;
+    __syncthreads();
+
+    //for(unsigned int i = 0; i<m_flock->m_boids.size(); ++i)
+    if(idx < NUM_BOIDS && idy < NUM_BOIDS)
+    {
+        _dist[idx] = _pos[idx] - _pos[idy];
+        distLength[idx] = lengthKernel(_dist[idx]);
+
+        if((distLength[idx]>0)&&(distLength[idx]<30.0))
+        {
+            //cohVec += other pos;
+            atomicAdd(&(_cohVec[idx].x), _pos[idy].x);
+            atomicAdd(&(_cohVec[idx].y), _pos[idy].y);
+            atomicAdd(&(_cohVec[idx].z), _pos[idy].z);
+
+            //count++
+            atomicAdd(&count[idx], 1);
+//                __syncthreads();
+        }
+    }
+    //need to sync
+    __syncthreads();
+
+    // Average
+    //if(idy == 0 && idx< NUM_BOIDS)
+    if(count[idx] > 0)
+    {
+        //m_steer/=(float(count));
+        _cohVec[idx] = _cohVec[idx]/count[idx];
+    }
+    __syncthreads();
+    //test
+    seekKernel(_pos,_vel,_cohVec,_cohVec);
+}
+
+__global__ void flockKernel(float3 * _sepVec, float3 * _cohVec, float3 * _pos, float3 * _vel)
 {
     uint idx = blockIdx.x * blockDim.x + threadIdx.x;
     uint idy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -171,13 +226,15 @@ __global__ void flockKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
     if(idx<NUM_BOIDS)
     {
         separateKernel(_sepVec,_pos,_vel);
+        cohesionKernel(_cohVec, _pos, _vel);
 
         __syncthreads();
 
         if(idy == 0)
         {
             // sum 3 rules (later)
-            _vel[idx] = _vel[idx] + _sepVec[idx];
+            //_vel[idx] = _vel[idx] + _sepVec[idx];
+            _vel[idx] += _sepVec[idx] + _cohVec[idx];
         }
     }
 }

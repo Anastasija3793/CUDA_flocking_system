@@ -86,14 +86,19 @@ FlockGPU::FlockGPU(int _numBoids)/* : m_numBoids(_numBoids), m_dPos(m_numBoids),
     m_dVelZ.resize(m_numBoids);
 
     m_pos.resize(m_numBoids);
-    xTest.resize(m_numBoids);
-    yTest.resize(m_numBoids);
-    zTest.resize(m_numBoids);
+//    xTest.resize(m_numBoids);
+//    yTest.resize(m_numBoids);
+//    zTest.resize(m_numBoids);
 
     m_dSep.resize(m_numBoids);
     m_dSepX.resize(m_numBoids);
     m_dSepY.resize(m_numBoids);
     m_dSepZ.resize(m_numBoids);
+
+    m_dCoh.resize(m_numBoids);
+    m_dCohX.resize(m_numBoids);
+    m_dCohY.resize(m_numBoids);
+    m_dCohZ.resize(m_numBoids);
 
 
 //    typedef thrust::device_vector<float>::iterator                     FloatIterator;
@@ -144,6 +149,7 @@ FlockGPU::FlockGPU(int _numBoids)/* : m_numBoids(_numBoids), m_dPos(m_numBoids),
     m_dVelPtr = thrust::raw_pointer_cast(&m_dVel[0]);
 
     m_dSepPtr = thrust::raw_pointer_cast(&m_dSep[0]);
+    m_dCohPtr = thrust::raw_pointer_cast(&m_dCoh[0]);
 
 //    m_dPosPtr = thrust::raw_pointer_cast(m_dPos.data());
 //    m_dVelPtr = thrust::raw_pointer_cast(m_dVel.data());
@@ -177,12 +183,20 @@ void FlockGPU::update()
                       m_dSep.begin(),
                       get3dVec());
 
+    thrust::fill(m_dCohX.begin(), m_dCohX.begin()+m_numBoids, 0);
+    thrust::fill(m_dCohY.begin(), m_dCohY.begin()+m_numBoids, 0);
+    thrust::fill(m_dCohZ.begin(), m_dCohZ.begin()+m_numBoids, 0);
+    thrust::transform(thrust::make_zip_iterator(make_tuple(m_dCohX.begin(), m_dCohY.begin(), m_dCohZ.begin())),
+                      thrust::make_zip_iterator(make_tuple(m_dCohX.end(),   m_dCohY.end(),   m_dCohZ.end())),
+                      m_dSep.begin(),
+                      get3dVec());
+
 //    thrust::copy(m_dSep.begin(),m_dSep.end(),m_sep.begin());
     //reset
 //    thrust::fill(m_dSep.begin(), m_dSep.begin()+m_numBoids, 0);
 //    thrust::fill(m_sep[0].x.begin(), m_sep[0].x.begin()+m_numBoids, 0);
 
-    flockKernel<<<grid2,block2>>>(m_dSepPtr,m_dPosPtr,m_dVelPtr);
+    flockKernel<<<grid2,block2>>>(m_dSepPtr,m_dCohPtr,m_dPosPtr,m_dVelPtr);
     cudaThreadSynchronize();
 
     updateKernel<<<N,M>>>(m_dPosPtr,m_dVelPtr);
