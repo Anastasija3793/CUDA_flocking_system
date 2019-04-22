@@ -46,8 +46,8 @@ __device__ void seekKernel(float3 * _pos, float3 * _vel, float3 * _target, float
     // for desired.normalize()
     float desiredLength[NUM_BOIDS];
 
-    float max_speed = 50.0; //1.0  //0.7
-    float max_force = 5.0; //0.03 //0.1
+    float max_speed = 20.0; //1.0  //0.7
+    float max_force = 2.0; //0.03 //0.1
 
     desired[idx] = _target[idx] - _pos[idx];
 
@@ -88,8 +88,8 @@ __device__ void separateKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
     __shared__ unsigned int count[NUM_BOIDS];
     float distLength[NUM_BOIDS];
 
-    float max_speed = 50.0; //1.0
-    float max_force = 5.0; //0.03
+    float max_speed = 20.0; //1.0
+    float max_force = 2.0; //0.03
 
     // for current boid
     uint idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -115,6 +115,7 @@ __device__ void separateKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
             atomicAdd(&(_diff[idx].x), _dist[idx].x);
             atomicAdd(&(_diff[idx].y), _dist[idx].y);
             atomicAdd(&(_diff[idx].z), _dist[idx].z);
+//            _diff[idx]+=_dist[idx];
 
             diffLength[idx] = lengthKernel(_diff[idx]);
             //(diff.normalize())/distLength;
@@ -124,9 +125,11 @@ __device__ void separateKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
             atomicAdd(&(_sepVec[idx].x), _diff[idx].x);
             atomicAdd(&(_sepVec[idx].y), _diff[idx].y);
             atomicAdd(&(_sepVec[idx].z), _diff[idx].z);
+//            _sepVec[idx]+=_diff[idx];
 
             //count++
             atomicAdd(&count[idx], 1);
+//            count[idx]+=1;
                 __syncthreads();
         }
     }
@@ -165,7 +168,7 @@ __device__ void separateKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
 
 __device__ void cohesionKernel(float3 * _cohVec, float3 * _pos, float3 * _vel)
 {
-    float cohVecLength[NUM_BOIDS];
+    //float cohVecLength[NUM_BOIDS];
 
     // for checking distance
     __shared__ float3 _dist[NUM_BOIDS];
@@ -174,8 +177,8 @@ __device__ void cohesionKernel(float3 * _cohVec, float3 * _pos, float3 * _vel)
     __shared__ unsigned int count[NUM_BOIDS];
     float distLength[NUM_BOIDS];
 
-    float max_speed = 50.0; //1.0
-    float max_force = 5.0; //0.03
+    //float max_speed = 50.0; //1.0
+    //float max_force = 5.0; //0.03
 
     // for current boid
     uint idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -197,9 +200,11 @@ __device__ void cohesionKernel(float3 * _cohVec, float3 * _pos, float3 * _vel)
             atomicAdd(&(_cohVec[idx].x), _pos[idy].x);
             atomicAdd(&(_cohVec[idx].y), _pos[idy].y);
             atomicAdd(&(_cohVec[idx].z), _pos[idy].z);
+//            _cohVec[idx]+=_pos[idy];
 
             //count++
             atomicAdd(&count[idx], 1);
+//            count[idx]+=1;
 //                __syncthreads();
         }
     }
@@ -218,15 +223,79 @@ __device__ void cohesionKernel(float3 * _cohVec, float3 * _pos, float3 * _vel)
     seekKernel(_pos,_vel,_cohVec,_cohVec);
 }
 
-__global__ void flockKernel(float3 * _sepVec, float3 * _cohVec, float3 * _pos, float3 * _vel)
+__device__ void alignmentKernel(float3 * _aliVec, float3 * _pos, float3 * _vel)
+{
+    // for checking distance
+    __shared__ float3 _dist[NUM_BOIDS];
+
+    //count of neighbours
+    __shared__ unsigned int count[NUM_BOIDS];
+    float distLength[NUM_BOIDS];
+    float aliVecLength[NUM_BOIDS];
+
+    float max_speed = 20.0; //1.0
+//    float max_force = 2.0; //0.03
+
+    // for current boid
+    uint idx = blockIdx.x * blockDim.x + threadIdx.x;
+    // for current boid's neighbours
+    uint idy = blockIdx.y * blockDim.y + threadIdx.y;
+
+    count[idx] = 0;
+    __syncthreads();
+
+    //for(unsigned int i = 0; i<m_flock->m_boids.size(); ++i)
+    if(idx < NUM_BOIDS && idy < NUM_BOIDS)
+    {
+        _dist[idx] = _pos[idx] - _pos[idy];
+        distLength[idx] = lengthKernel(_dist[idx]);
+
+        if((distLength[idx]>0)&&(distLength[idx]<30.0))
+        {
+            //cohVec += other pos;
+            atomicAdd(&(_aliVec[idx].x), _vel[idy].x);
+            atomicAdd(&(_aliVec[idx].y), _vel[idy].y);
+            atomicAdd(&(_aliVec[idx].z), _vel[idy].z);
+//            _aliVec[idx]+=_vel[idy];
+
+            //count++
+            atomicAdd(&count[idx], 1);
+//            count[idx]+=1;
+//                __syncthreads();
+        }
+    }
+    //need to sync
+    __syncthreads();
+
+    aliVecLength[idx] = lengthKernel(_aliVec[idx]);
+    // Average
+    //if(idy == 0 && idx< NUM_BOIDS)
+    if(count[idx] > 0)
+    {
+        //m_steer/=(float(count));
+        _aliVec[idx] = _aliVec[idx]/count[idx];
+
+        _aliVec[idx] = (_aliVec[idx]/aliVecLength[idx])*max_speed;
+        _aliVec[idx] = _aliVec[idx] - _vel[idx];
+    }
+
+    __syncthreads();
+    //test
+    seekKernel(_pos,_vel,_aliVec,_aliVec);
+}
+
+__global__ void flockKernel(float3 * _sepVec, float3 * _cohVec, float3 * _aliVec, float3 * _pos, float3 * _vel)
 {
     uint idx = blockIdx.x * blockDim.x + threadIdx.x;
     uint idy = blockIdx.y * blockDim.y + threadIdx.y;
 
     if(idx<NUM_BOIDS)
     {
-        separateKernel(_sepVec,_pos,_vel);
+        separateKernel(_sepVec, _pos, _vel);
+//        __syncthreads();
         cohesionKernel(_cohVec, _pos, _vel);
+
+        alignmentKernel(_aliVec, _pos, _vel);
 
         __syncthreads();
 
@@ -234,7 +303,7 @@ __global__ void flockKernel(float3 * _sepVec, float3 * _cohVec, float3 * _pos, f
         {
             // sum 3 rules (later)
             //_vel[idx] = _vel[idx] + _sepVec[idx];
-            _vel[idx] += _sepVec[idx] + _cohVec[idx];
+            _vel[idx] += _sepVec[idx] + _cohVec[idx] + _aliVec[idx];
         }
     }
 }
