@@ -163,7 +163,7 @@ __device__ void separateKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
     //test
     //maybe change
     //seekKernel(_posX,_posY,_posZ,_velX,_velY,_velZ,_sepVecX,_sepVecY,_sepVecZ,_sepVecX,_sepVecY,_sepVecZ);
-    seekKernel(_pos,_vel,_sepVec,_sepVec);
+//    seekKernel(_pos,_vel,_sepVec,_sepVec);
 }
 
 __device__ void cohesionKernel(float3 * _cohVec, float3 * _pos, float3 * _vel)
@@ -281,7 +281,7 @@ __device__ void alignmentKernel(float3 * _aliVec, float3 * _pos, float3 * _vel)
 
     __syncthreads();
     //test
-    seekKernel(_pos,_vel,_aliVec,_aliVec);
+//    seekKernel(_pos,_vel,_aliVec,_aliVec);
 }
 
 __global__ void flockKernel(float3 * _sepVec, float3 * _cohVec, float3 * _aliVec, float3 * _pos, float3 * _vel)

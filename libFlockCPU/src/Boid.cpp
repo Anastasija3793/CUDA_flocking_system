@@ -27,89 +27,89 @@ Boid::Boid(ngl::Vec3 _pos, Flock *_flock)
     //m_hit=false;
 }
 
-void Boid::updateRotation()
-{
-    //ngl::Vec3 facing = {0,0,1};
-    //rotation 0 when facing in z axis
-    ngl::Vec3 facing = ngl::Vec3(0.0f,0.0f,1.0f);
-    //ngl::Random *rand=ngl::Random::instance();
+//void Boid::updateRotation()
+//{
+//    //ngl::Vec3 facing = {0,0,1};
+//    //rotation 0 when facing in z axis
+//    ngl::Vec3 facing = ngl::Vec3(0.0f,0.0f,1.0f);
+//    //ngl::Random *rand=ngl::Random::instance();
 
-    // if moving -> update
-    if(m_vel.operator != (ngl::Vec3(0.0f,0.0f,0.0f)))
-    //if(m_vel.operator !=({0,0,0}))
-    {
-        float mag1 = facing.length();
-        float mag2 = m_vel.length();
+//    // if moving -> update
+//    if(m_vel.operator != (ngl::Vec3(0.0f,0.0f,0.0f)))
+//    //if(m_vel.operator !=({0,0,0}))
+//    {
+//        float mag1 = facing.length();
+//        float mag2 = m_vel.length();
 
-        //angle between our axis (z) and boid vel vector
-        float steer = std::acos(facing.dot(m_vel)/(mag1*mag2));
-        //radians -> degrees
-        steer = steer*(180/M_PI);
+//        //angle between our axis (z) and boid vel vector
+//        float steer = std::acos(facing.dot(m_vel)/(mag1*mag2));
+//        //radians -> degrees
+//        steer = steer*(180/M_PI);
 
-        //if rotation past 180 degrees must take away from 360, then update boid rotation
-        if(m_vel[0]>0)
-        {
-         m_rotation[1] = steer;
-        }
-        else
-        {
-         m_rotation[1]= 360-steer;
-        }
-    }
-}
+//        //if rotation past 180 degrees must take away from 360, then update boid rotation
+//        if(m_vel[0]>0)
+//        {
+//         m_rotation[1] = steer;
+//        }
+//        else
+//        {
+//         m_rotation[1]= 360-steer;
+//        }
+//    }
+//}
 
 void Boid::applyForce(ngl::Vec3 _force)
 {
     m_acc+=_force;
 }
 
-void Boid::bbox()
-{
-    ngl::Vec3 desiredVel;
+//void Boid::bbox()
+//{
+//    ngl::Vec3 desiredVel;
 
-        if(m_pos.m_x >= 2 && m_vel.m_x >0)
-        {
-            desiredVel = ngl::Vec3(-m_vel.m_x,m_vel.m_y,m_vel.m_z);
-            m_vel += seek(desiredVel);
+//        if(m_pos.m_x >= 2 && m_vel.m_x >0)
+//        {
+//            desiredVel = ngl::Vec3(-m_vel.m_x,m_vel.m_y,m_vel.m_z);
+//            m_vel += seek(desiredVel);
 
-            //std::cout<<" out of bbox x bounds\n";
-        }
-        else if(m_pos.m_x <= -2 && m_vel.m_x <0)
-        {
-            desiredVel = ngl::Vec3(-m_vel.m_x,m_vel.m_y,m_vel.m_z);
-            m_vel += seek(desiredVel);
+//            //std::cout<<" out of bbox x bounds\n";
+//        }
+//        else if(m_pos.m_x <= -2 && m_vel.m_x <0)
+//        {
+//            desiredVel = ngl::Vec3(-m_vel.m_x,m_vel.m_y,m_vel.m_z);
+//            m_vel += seek(desiredVel);
 
-            //std::cout<<" out of bbox -x bounds\n";
-        }
-        else if(m_pos.m_y >= 2 && m_vel.m_y >0)
-        {
-            desiredVel = ngl::Vec3(m_vel.m_x,-m_vel.m_y,m_vel.m_z);
-            m_vel += seek(desiredVel);
+//            //std::cout<<" out of bbox -x bounds\n";
+//        }
+//        else if(m_pos.m_y >= 2 && m_vel.m_y >0)
+//        {
+//            desiredVel = ngl::Vec3(m_vel.m_x,-m_vel.m_y,m_vel.m_z);
+//            m_vel += seek(desiredVel);
 
-            //std::cout<<" out of bbox y bounds\n";
-        }
-        else if(m_pos.m_y <= -2 && m_vel.m_y <0)
-        {
-            desiredVel = ngl::Vec3(m_vel.m_x,-m_vel.m_y,m_vel.m_z);
-            m_vel += seek(desiredVel);
+//            //std::cout<<" out of bbox y bounds\n";
+//        }
+//        else if(m_pos.m_y <= -2 && m_vel.m_y <0)
+//        {
+//            desiredVel = ngl::Vec3(m_vel.m_x,-m_vel.m_y,m_vel.m_z);
+//            m_vel += seek(desiredVel);
 
-            //std::cout<<" out of bbox -y bounds\n";
-        }
-        else if(m_pos.m_z >= 2 && m_vel.m_z >0)
-        {
-            desiredVel = ngl::Vec3(m_vel.m_x,m_vel.m_y,-m_vel.m_z);
-            m_vel += seek(desiredVel);
+//            //std::cout<<" out of bbox -y bounds\n";
+//        }
+//        else if(m_pos.m_z >= 2 && m_vel.m_z >0)
+//        {
+//            desiredVel = ngl::Vec3(m_vel.m_x,m_vel.m_y,-m_vel.m_z);
+//            m_vel += seek(desiredVel);
 
-            //std::cout<<" out of bbox z bounds\n";
-        }
-        else if(m_pos.m_z <= -2 && m_vel.m_z <0)
-        {
-            desiredVel = ngl::Vec3(m_vel.m_x,m_vel.m_y,-m_vel.m_z);
-            m_vel += seek(desiredVel);
+//            //std::cout<<" out of bbox z bounds\n";
+//        }
+//        else if(m_pos.m_z <= -2 && m_vel.m_z <0)
+//        {
+//            desiredVel = ngl::Vec3(m_vel.m_x,m_vel.m_y,-m_vel.m_z);
+//            m_vel += seek(desiredVel);
 
-            //std::cout<<" out of bbox -z bounds\n";
-        }
-}
+//            //std::cout<<" out of bbox -z bounds\n";
+//        }
+//}
 
 void Boid::flock()
 {
@@ -202,12 +202,13 @@ ngl::Vec3 Boid::align()
         sum.normalize();
         sum*=max_speed;
         m_steer = sum - m_vel;
-        return m_steer;
+
     }
-    else
-    {
-        return ngl::Vec3(0.0f,0.0f,0.0f);
-    }
+    return m_steer;
+//    else
+//    {
+//        return ngl::Vec3(0.0f,0.0f,0.0f);
+//    }
 }
 
 ngl::Vec3 Boid::cohesion()
@@ -226,12 +227,13 @@ ngl::Vec3 Boid::cohesion()
     if(count>0)
     {
         sum/=count;
-        return seek(sum);
+
     }
-    else
-    {
-        return ngl::Vec3(0.0f,0.0f,0.0f);
-    }
+    return seek(sum);
+//    else
+//    {
+//        return ngl::Vec3(0.0f,0.0f,0.0f);
+//    }
 }
 
 
@@ -271,7 +273,7 @@ void Boid::update()
     //m_vel+=m_acc;
     //m_pos+=m_vel;
     //BBoxCollision();
-    bbox();
+//    bbox();
     flock();
     m_vel+=m_acc;
 
@@ -294,6 +296,6 @@ void Boid::update()
     m_pos+=m_vel;
     m_acc*=max_speed;
 
-    updateRotation();
+//    updateRotation();
     //m_hit=false;
 }

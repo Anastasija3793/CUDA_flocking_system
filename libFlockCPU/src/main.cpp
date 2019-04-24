@@ -74,7 +74,7 @@ int main()
 
     Flock f_cpu(100);
 
-    for(int i = 0; i< 250; i++) //150
+    for(int i = 0; i< 150; i++) //150
     {
 
         f_cpu.update();

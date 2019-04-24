@@ -123,14 +123,14 @@ FlockGPU::FlockGPU(int _numBoids)/* : m_numBoids(_numBoids), m_dPos(m_numBoids),
 //        return rand() % 100;
 //    });
     std::generate(randPos.begin(), randPos.end(),
-                randGen(100));//500
+                randGen(10));//500 //100
 
     std::vector<float> randVel(m_numBoids*3);
 //    std::generate(randVel.begin(), randVel.end(), []() {
 //        return rand() % 100;
 //    });
     std::generate(randVel.begin(), randVel.end(),
-                randGen(100));
+                randGen(10));
 
     m_dPosX = randPos;
     m_dPosY = randPos;
