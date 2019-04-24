@@ -3,7 +3,7 @@ include(../common.pri)
 # This specifies the exe name
 TARGET=FlockGPU
 
-#TEMPLATE = lib
+TEMPLATE = lib
 # where to put the .o files
 OBJECTS_DIR=obj
 CUDA_OBJECTS_DIR = cudaobj
@@ -31,19 +31,17 @@ isEmpty(CUDA_COMPUTE_ARCH) {
 CONFIG-=app_bundle
 
 # Auto include all .cpp files in the project src directory (can specifiy individually if required)
-#SOURCES+= $$PWD/src/libFlockGPU.cpp
-#          $$PWD/src/BoidGPU.cu \
-#          $$PWD/src/FlockGPU.cu
+SOURCES+= $$PWD/src/libFlockGPU.cpp
 
 CUDA_SOURCES += $$PWD/src/FlockGPU.cu \
-                $$PWD/src/Debug.cu \
-                $$PWD/src/main.cu
+                $$PWD/src/Debug.cu 
+#                $$PWD/src/main.cu
 #                $$PWD/src/BoidGPU.cu
 # same for the .h files
 HEADERS+= $$PWD/include/FlockGPU.cuh \
           $$PWD/include/Debug.cuh \
-          $$PWD/include/BoidGPUKernels.cuh 
-#          $$PWD/include/libFlockGPU.h
+          $$PWD/include/BoidGPUKernels.cuh \
+          $$PWD/include/libFlockGPU.h
 #          $$PWD/include/BoidGPU.cuh
 # and add the include dir into the search path for Qt and make
 INCLUDEPATH +=./include

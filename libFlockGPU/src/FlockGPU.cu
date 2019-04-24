@@ -105,6 +105,11 @@ FlockGPU::FlockGPU(int _numBoids)/* : m_numBoids(_numBoids), m_dPos(m_numBoids),
     m_dAliY.resize(m_numBoids);
     m_dAliZ.resize(m_numBoids);
 
+    m_dAcc.resize(m_numBoids);
+    m_dAccX.resize(m_numBoids);
+    m_dAccY.resize(m_numBoids);
+    m_dAccZ.resize(m_numBoids);
+
 
 //    typedef thrust::device_vector<float>::iterator                     FloatIterator;
 //    typedef thrust::tuple<FloatIterator, FloatIterator, FloatIterator> FloatIteratorTuple;
@@ -157,6 +162,8 @@ FlockGPU::FlockGPU(int _numBoids)/* : m_numBoids(_numBoids), m_dPos(m_numBoids),
     m_dCohPtr = thrust::raw_pointer_cast(&m_dCoh[0]);
     m_dAliPtr = thrust::raw_pointer_cast(&m_dAli[0]);
 
+    m_dAccPtr = thrust::raw_pointer_cast(&m_dAcc[0]);
+
 //    m_dPosPtr = thrust::raw_pointer_cast(m_dPos.data());
 //    m_dVelPtr = thrust::raw_pointer_cast(m_dVel.data());
 }
@@ -205,15 +212,23 @@ void FlockGPU::update()
                       m_dAli.begin(),
                       get3dVec());
 
+    thrust::fill(m_dAccX.begin(), m_dAccX.begin()+m_numBoids, 0);
+    thrust::fill(m_dAccY.begin(), m_dAccY.begin()+m_numBoids, 0);
+    thrust::fill(m_dAccZ.begin(), m_dAccZ.begin()+m_numBoids, 0);
+    thrust::transform(thrust::make_zip_iterator(make_tuple(m_dAccX.begin(), m_dAccY.begin(), m_dAccZ.begin())),
+                      thrust::make_zip_iterator(make_tuple(m_dAccX.end(),   m_dAccY.end(),   m_dAccZ.end())),
+                      m_dAcc.begin(),
+                      get3dVec());
+
 //    thrust::copy(m_dSep.begin(),m_dSep.end(),m_sep.begin());
     //reset
 //    thrust::fill(m_dSep.begin(), m_dSep.begin()+m_numBoids, 0);
 //    thrust::fill(m_sep[0].x.begin(), m_sep[0].x.begin()+m_numBoids, 0);
 
-    flockKernel<<<grid2,block2>>>(m_dSepPtr,m_dCohPtr,m_dAliPtr,m_dPosPtr,m_dVelPtr);
+    flockKernel<<<grid2,block2>>>(m_dSepPtr,m_dCohPtr,m_dAliPtr,m_dAccPtr,m_dPosPtr,m_dVelPtr);
     cudaThreadSynchronize();
 
-    updateKernel<<<N,M>>>(m_dPosPtr,m_dVelPtr);
+    updateKernel<<<N,M>>>(m_dPosPtr,m_dAccPtr,m_dVelPtr);
     cudaThreadSynchronize();
 
     thrust::copy(m_dPos.begin(),m_dPos.end(),m_pos.begin());

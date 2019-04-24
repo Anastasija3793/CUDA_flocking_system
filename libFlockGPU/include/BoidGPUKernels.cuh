@@ -21,24 +21,44 @@
 
 #define NUM_BOIDS 100
 
-__global__ void updateKernel(float3 * _pos, const float3 * _vel)
-{
-    uint idx = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if(idx<NUM_BOIDS)
-    {
-        _pos[idx]+=_vel[idx];
-    }
-}
-
 __device__ float lengthKernel(float3 _vec)
 {
     float length = sqrtf((_vec.x*_vec.x)+(_vec.y*_vec.y)+(_vec.z*_vec.z));
     return length;
 }
 
+__global__ void updateKernel(float3 * _pos, float3 * _acc, float3 * _vel)
+{
+    float velLength[NUM_BOIDS];
+    float max_speed = 1.0; //1.0  //0.7
+
+    uint idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if(idx<NUM_BOIDS)
+    {
+        _vel[idx]+=_acc[idx];
+        velLength[idx] = lengthKernel(_vel[idx]);
+        if(velLength[idx] > max_speed)
+        {
+            _vel[idx] = (_vel[idx]/velLength[idx])*max_speed;
+        }
+        _pos[idx]+=_vel[idx];
+        _acc[idx]*=max_speed;
+    }
+}
+
+__device__ void applyForceKernel(float3 * _force, float3 * _acc)
+{
+    uint idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if(idx<NUM_BOIDS)
+    {
+        _acc[idx]+=_force[idx];
+    }
+}
+
 //change to __device__ later
-__device__ void seekKernel(float3 * _pos, float3 * _vel, float3 * _target, float3 * _seek)
+__device__ void seekKernel(const float3 * _pos, const float3 * _vel, const float3 * _target, float3 * _seek)
 {
     uint idx = blockIdx.x * blockDim.x + threadIdx.x;
     float3 desired[NUM_BOIDS];
@@ -46,22 +66,19 @@ __device__ void seekKernel(float3 * _pos, float3 * _vel, float3 * _target, float
     // for desired.normalize()
     float desiredLength[NUM_BOIDS];
 
-    float max_speed = 10.0; //1.0  //0.7
-    float max_force = 1.0; //0.03 //0.1
+    float max_speed = 1.0; //1.0  //0.7 //10.0
+    float max_force = 0.03; //0.03 //0.1 //1.0
 
     desired[idx] = _target[idx] - _pos[idx];
 
     //float normalize(desired[idx]);
     desiredLength[idx] = lengthKernel(desired[idx]);
-    //desiredX[idx] = desiredX[idx]/desiredLength[idx];
-    //desiredX[idx] = desiredX[idx] * max_speed;
     desired[idx] = (desired[idx]/desiredLength[idx]) * max_speed;
 
     _seek[idx] = desired[idx] - _vel[idx];
     //m_steer.length()
     seekLength[idx] = lengthKernel(_seek[idx]);
 
-//    __syncthreads();
     // Limit to maximum steering force (limit by max_force)
     if(idx<NUM_BOIDS)
     {
@@ -88,8 +105,8 @@ __device__ void separateKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
     __shared__ unsigned int count[NUM_BOIDS];
     float distLength[NUM_BOIDS];
 
-    float max_speed = 10.0; //1.0
-    float max_force = 1.0; //0.03
+    float max_speed = 1.0; //1.0
+    float max_force = 0.03; //0.03
 
     // for current boid
     uint idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -130,7 +147,6 @@ __device__ void separateKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
             //count++
             atomicAdd(&count[idx], 1);
 //            count[idx]+=1;
-//                __syncthreads();
         }
     }
     //need to sync
@@ -143,14 +159,12 @@ __device__ void separateKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
         //m_steer/=(float(count));
         _sepVec[idx] = _sepVec[idx]/count[idx];
     }
-//    __syncthreads();
 
     sepVecLength[idx] = lengthKernel(_sepVec[idx]);
     if(sepVecLength[idx] > 0)
     {
         //sepVec.normalize();
         _sepVec[idx] = (_sepVec[idx]/sepVecLength[idx])*max_speed;
-//        __syncthreads();//maybe
         _sepVec[idx] = _sepVec[idx] - _vel[idx];
 
         //limit by max_force
@@ -159,17 +173,10 @@ __device__ void separateKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
             _sepVec[idx] = (_sepVec[idx]/sepVecLength[idx])*max_force;
         }
     }
-//    __syncthreads();
-    //test
-    //maybe change
-    //seekKernel(_posX,_posY,_posZ,_velX,_velY,_velZ,_sepVecX,_sepVecY,_sepVecZ,_sepVecX,_sepVecY,_sepVecZ);
-//    seekKernel(_pos,_vel,_sepVec,_sepVec);
 }
 
 __device__ void cohesionKernel(float3 * _cohVec, float3 * _pos, float3 * _vel)
 {
-    //float cohVecLength[NUM_BOIDS];
-
     // for checking distance
     __shared__ float3 _dist[NUM_BOIDS];
 
@@ -205,7 +212,6 @@ __device__ void cohesionKernel(float3 * _cohVec, float3 * _pos, float3 * _vel)
             //count++
             atomicAdd(&count[idx], 1);
 //            count[idx]+=1;
-//                __syncthreads();
         }
     }
     //need to sync
@@ -218,8 +224,6 @@ __device__ void cohesionKernel(float3 * _cohVec, float3 * _pos, float3 * _vel)
         //m_steer/=(float(count));
         _cohVec[idx] = _cohVec[idx]/count[idx];
     }
-//    __syncthreads();
-    //test
     seekKernel(_pos,_vel,_cohVec,_cohVec);
 }
 
@@ -233,7 +237,7 @@ __device__ void alignmentKernel(float3 * _aliVec, float3 * _pos, float3 * _vel)
     float distLength[NUM_BOIDS];
     float aliVecLength[NUM_BOIDS];
 
-    float max_speed = 10.0; //1.0
+    float max_speed = 1.0; //1.0
 //    float max_force = 2.0; //0.03
 
     // for current boid
@@ -261,7 +265,6 @@ __device__ void alignmentKernel(float3 * _aliVec, float3 * _pos, float3 * _vel)
             //count++
             atomicAdd(&count[idx], 1);
 //            count[idx]+=1;
-//                __syncthreads();
         }
     }
     //need to sync
@@ -278,13 +281,9 @@ __device__ void alignmentKernel(float3 * _aliVec, float3 * _pos, float3 * _vel)
         _aliVec[idx] = (_aliVec[idx]/aliVecLength[idx])*max_speed;
         _aliVec[idx] = _aliVec[idx] - _vel[idx];
     }
-
-//    __syncthreads();
-    //test
-//    seekKernel(_pos,_vel,_aliVec,_aliVec);
 }
 
-__global__ void flockKernel(float3 * _sepVec, float3 * _cohVec, float3 * _aliVec, float3 * _pos, float3 * _vel)
+__global__ void flockKernel(float3 * _sepVec, float3 * _cohVec, float3 * _aliVec, float3 * _acc, float3 * _pos, float3 * _vel)
 {
     uint idx = blockIdx.x * blockDim.x + threadIdx.x;
     uint idy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -292,18 +291,20 @@ __global__ void flockKernel(float3 * _sepVec, float3 * _cohVec, float3 * _aliVec
     if(idx<NUM_BOIDS)
     {
         separateKernel(_sepVec, _pos, _vel);
-//        __syncthreads();
         cohesionKernel(_cohVec, _pos, _vel);
-
         alignmentKernel(_aliVec, _pos, _vel);
 
         __syncthreads();
+
+        applyForceKernel(_sepVec,_acc);
+        applyForceKernel(_cohVec,_acc);
+//        applyForceKernel(_aliVec,_acc);
 
         if(idy == 0)
         {
             // sum 3 rules (later)
             //_vel[idx] = _vel[idx] + _sepVec[idx];
-            _vel[idx] += (_sepVec[idx]*1.5) + (_cohVec[idx]*1) + (_aliVec[idx]*0.02);
+            _vel[idx] += (_sepVec[idx]*1.5) + (_cohVec[idx]*1) + (_aliVec[idx]*0.02);//1
         }
     }
 }

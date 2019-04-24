@@ -3,10 +3,31 @@
 #include <time.h>
 #include <sys/time.h>
 #include "Flock.h"
+#include "libFlockGPU.h"
 
 
 int main()
 {
+    // GPU flocking system
+        struct timeval tim;
+        double t1, t2;
+        gettimeofday(&tim, NULL);
+        t1=tim.tv_sec+(tim.tv_usec/1000000.0);
+
+        libFlockGPU flockGPU(100);
+
+        for(int i = 0; i< 250; i++) //250
+        {
+            flockGPU.update();
+            flockGPU.dumpGeo(i);
+        }
+
+        gettimeofday(&tim, NULL);
+        t2=tim.tv_sec+(tim.tv_usec/1000000.0);
+
+    std::cout << "GPU took " << t2-t1 << "s\n";
+
+
 
     // CPU flocking system
     struct timeval tim_cpu;

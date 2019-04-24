@@ -22,7 +22,8 @@ SOURCES+=$$PWD/src/main.cpp
 
 # and add the include dir into the search path for Qt and make
 INCLUDEPATH +=./include \
-            ../libFlockCPU/include
+            ../libFlockCPU/include \
+			../libFlockGPU/include
 # where our exe is going to live (root of project)
 DESTDIR=./
 # add the glsl shader files
@@ -32,6 +33,7 @@ CONFIG += console
 
 
 LIBS += -L../libFlockCPU -lFlockCPU #-llibFlockGPU
+LIBS += -L../libFlockGPU -lFlockGPU
 
 
 NGLPATH=$$(NGLDIR)

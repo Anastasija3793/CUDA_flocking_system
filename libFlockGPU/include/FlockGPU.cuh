@@ -77,6 +77,12 @@ private:
     thrust::device_vector<float> m_dAliY;
     thrust::device_vector<float> m_dAliZ;
     float3 * m_dAliPtr;
+
+    thrust::device_vector<float3> m_dAcc;
+    thrust::device_vector<float> m_dAccX;
+    thrust::device_vector<float> m_dAccY;
+    thrust::device_vector<float> m_dAccZ;
+    float3 * m_dAccPtr;
 };
 
 #endif // FLOCKGPU_H

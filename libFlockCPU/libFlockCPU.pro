@@ -1,7 +1,7 @@
 # This specifies the exe name
 TARGET=FlockCPU
 
-#TEMPLATE = lib
+TEMPLATE = lib
 # where to put the .o files
 OBJECTS_DIR=obj
 # core Qt Libs to use add more here if needed.
@@ -18,8 +18,8 @@ MOC_DIR=moc
 CONFIG-=app_bundle
 # Auto include all .cpp files in the project src directory (can specifiy individually if required)
 SOURCES+=$$PWD/src/Boid.cpp \
-         $$PWD/src/Flock.cpp \
-		 $$PWD/src/main.cpp
+         $$PWD/src/Flock.cpp 
+#		 $$PWD/src/main.cpp
 
 #         $$PWD/src/NGLScene.cpp \
 
