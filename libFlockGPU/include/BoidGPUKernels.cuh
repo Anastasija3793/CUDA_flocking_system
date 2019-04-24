@@ -46,8 +46,8 @@ __device__ void seekKernel(float3 * _pos, float3 * _vel, float3 * _target, float
     // for desired.normalize()
     float desiredLength[NUM_BOIDS];
 
-    float max_speed = 20.0; //1.0  //0.7
-    float max_force = 2.0; //0.03 //0.1
+    float max_speed = 10.0; //1.0  //0.7
+    float max_force = 1.0; //0.03 //0.1
 
     desired[idx] = _target[idx] - _pos[idx];
 
@@ -61,7 +61,7 @@ __device__ void seekKernel(float3 * _pos, float3 * _vel, float3 * _target, float
     //m_steer.length()
     seekLength[idx] = lengthKernel(_seek[idx]);
 
-    __syncthreads();
+//    __syncthreads();
     // Limit to maximum steering force (limit by max_force)
     if(idx<NUM_BOIDS)
     {
@@ -88,23 +88,23 @@ __device__ void separateKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
     __shared__ unsigned int count[NUM_BOIDS];
     float distLength[NUM_BOIDS];
 
-    float max_speed = 20.0; //1.0
-    float max_force = 2.0; //0.03
+    float max_speed = 10.0; //1.0
+    float max_force = 1.0; //0.03
 
     // for current boid
     uint idx = blockIdx.x * blockDim.x + threadIdx.x;
     // for current boid's neighbours
     uint idy = blockIdx.y * blockDim.y + threadIdx.y;
 
-    count[idx] = 0;
-    _diff[idx].x = 0;
-    _diff[idx].y = 0;
-    _diff[idx].z = 0;
-    __syncthreads();
-
     //for(unsigned int i = 0; i<m_flock->m_boids.size(); ++i)
     if(idx < NUM_BOIDS && idy < NUM_BOIDS)
     {
+        count[idx] = 0;
+        _diff[idx].x = 0;
+        _diff[idx].y = 0;
+        _diff[idx].z = 0;
+        __syncthreads();
+
         _dist[idx] = _pos[idx] - _pos[idy];
 
         distLength[idx] = lengthKernel(_dist[idx]);
@@ -130,7 +130,7 @@ __device__ void separateKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
             //count++
             atomicAdd(&count[idx], 1);
 //            count[idx]+=1;
-                __syncthreads();
+//                __syncthreads();
         }
     }
     //need to sync
@@ -143,7 +143,7 @@ __device__ void separateKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
         //m_steer/=(float(count));
         _sepVec[idx] = _sepVec[idx]/count[idx];
     }
-    __syncthreads();
+//    __syncthreads();
 
     sepVecLength[idx] = lengthKernel(_sepVec[idx]);
     if(sepVecLength[idx] > 0)
@@ -159,7 +159,7 @@ __device__ void separateKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
             _sepVec[idx] = (_sepVec[idx]/sepVecLength[idx])*max_force;
         }
     }
-    __syncthreads();
+//    __syncthreads();
     //test
     //maybe change
     //seekKernel(_posX,_posY,_posZ,_velX,_velY,_velZ,_sepVecX,_sepVecY,_sepVecZ,_sepVecX,_sepVecY,_sepVecZ);
@@ -185,12 +185,12 @@ __device__ void cohesionKernel(float3 * _cohVec, float3 * _pos, float3 * _vel)
     // for current boid's neighbours
     uint idy = blockIdx.y * blockDim.y + threadIdx.y;
 
-    count[idx] = 0;
-    __syncthreads();
-
     //for(unsigned int i = 0; i<m_flock->m_boids.size(); ++i)
     if(idx < NUM_BOIDS && idy < NUM_BOIDS)
     {
+        count[idx] = 0;
+        __syncthreads();
+
         _dist[idx] = _pos[idx] - _pos[idy];
         distLength[idx] = lengthKernel(_dist[idx]);
 
@@ -218,7 +218,7 @@ __device__ void cohesionKernel(float3 * _cohVec, float3 * _pos, float3 * _vel)
         //m_steer/=(float(count));
         _cohVec[idx] = _cohVec[idx]/count[idx];
     }
-    __syncthreads();
+//    __syncthreads();
     //test
     seekKernel(_pos,_vel,_cohVec,_cohVec);
 }
@@ -233,7 +233,7 @@ __device__ void alignmentKernel(float3 * _aliVec, float3 * _pos, float3 * _vel)
     float distLength[NUM_BOIDS];
     float aliVecLength[NUM_BOIDS];
 
-    float max_speed = 20.0; //1.0
+    float max_speed = 10.0; //1.0
 //    float max_force = 2.0; //0.03
 
     // for current boid
@@ -241,12 +241,12 @@ __device__ void alignmentKernel(float3 * _aliVec, float3 * _pos, float3 * _vel)
     // for current boid's neighbours
     uint idy = blockIdx.y * blockDim.y + threadIdx.y;
 
-    count[idx] = 0;
-    __syncthreads();
-
     //for(unsigned int i = 0; i<m_flock->m_boids.size(); ++i)
     if(idx < NUM_BOIDS && idy < NUM_BOIDS)
     {
+        count[idx] = 0;
+        __syncthreads();
+
         _dist[idx] = _pos[idx] - _pos[idy];
         distLength[idx] = lengthKernel(_dist[idx]);
 
@@ -279,7 +279,7 @@ __device__ void alignmentKernel(float3 * _aliVec, float3 * _pos, float3 * _vel)
         _aliVec[idx] = _aliVec[idx] - _vel[idx];
     }
 
-    __syncthreads();
+//    __syncthreads();
     //test
 //    seekKernel(_pos,_vel,_aliVec,_aliVec);
 }
@@ -303,7 +303,7 @@ __global__ void flockKernel(float3 * _sepVec, float3 * _cohVec, float3 * _aliVec
         {
             // sum 3 rules (later)
             //_vel[idx] = _vel[idx] + _sepVec[idx];
-            _vel[idx] += _sepVec[idx] + _cohVec[idx] + _aliVec[idx];
+            _vel[idx] += (_sepVec[idx]*1.5) + (_cohVec[idx]*1) + (_aliVec[idx]*0.02);
         }
     }
 }

@@ -17,7 +17,7 @@ int main()
 
     FlockGPU flockGPU(100);
 
-    for(int i = 0; i< 150; i++) //250
+    for(int i = 0; i< 250; i++) //250
     {
         flockGPU.update();
         flockGPU.dumpGeo(i);
