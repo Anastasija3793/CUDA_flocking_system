@@ -46,3 +46,4 @@ cudalink.CONFIG = combine
 cudalink.dependency_type = TYPE_C
 cudalink.depend_command = $${CUDA_COMPILE_BASE} -M
 QMAKE_EXTRA_COMPILERS += cudalink
+
