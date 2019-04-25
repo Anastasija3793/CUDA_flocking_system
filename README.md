@@ -1,9 +1,9 @@
 # CUDA Fireflies Flocking System
 
-Final year CUDA assignment implement on flocking system (based on 2nd year assignment).
-
 Final year CUDA assignment representing fireflies flocking system. 
+
 The serialized code is based on 2nd year assignment: https://github.com/Anastasija3793/FlockingSystem.
+
 However, it is modified in order to achieve the behaviour similar to a flock of fireflies.
 
 ## Dependencies
