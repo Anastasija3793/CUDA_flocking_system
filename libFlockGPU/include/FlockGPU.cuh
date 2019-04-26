@@ -11,6 +11,8 @@
 #include <thrust/sort.h>
 #include <thrust/fill.h>
 
+#include <stdlib.h>
+
 
 class FlockGPU
 {
@@ -45,6 +47,8 @@ private:
     std::vector<float> yTest;
     std::vector<float> zTest;
     //float m_dPos;
+    std::vector<float3> m_test;
+    std::vector<float3> m_testVel;
 
     // stores boids velocity
     thrust::device_vector<float3> m_dVel;
@@ -85,4 +89,4 @@ private:
     float3 * m_dAccPtr;
 };
 
-#endif // FLOCKGPU_H
+#endif // FLOCKGPU_CUH

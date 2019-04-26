@@ -10,10 +10,13 @@
 #define PI = 3.14159
 
 
-Boid::Boid(ngl::Vec3 _pos, Flock *_flock)
+Boid::Boid(/*ngl::Vec3 _pos, */Flock *_flock)
 {
+//    ngl::Random *rand=ngl::Random::instance();
+//    ngl::Vec3 r = rand->getRandomVec3();
 
-    m_pos = _pos;
+    m_pos = ngl::Vec3((float(rand())/RAND_MAX), (float(rand())/RAND_MAX), (float(rand())/RAND_MAX));
+    //m_vel = r;
     m_vel=ngl::Vec3((float(rand())/RAND_MAX), (float(rand())/RAND_MAX), (float(rand())/RAND_MAX));
 
     m_acc = ngl::Vec3(0.0f,0.0f,0.0f);

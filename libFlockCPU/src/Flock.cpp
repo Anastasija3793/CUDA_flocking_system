@@ -4,17 +4,18 @@
 #include <iostream>
 #include <fstream>
 
-const static int b_extents=20;
+//const static int b_extents=20;
 
 Flock::Flock(int _numBoids)
 {
     //m_boids.clear();
-    ngl::Random *rand=ngl::Random::instance();
-    ngl::Vec3 rP = rand->getRandomVec3();
+//    ngl::Random *rand=ngl::Random::instance();
+//    ngl::Vec3 rP = rand->getRandomVec3();
     for (int i=0; i< _numBoids; ++i)
     {
         //auto randPos = rand->getRandomPoint(b_extents,b_extents,b_extents);
-        m_boids.push_back(Boid(rP,this));
+        //m_boids.push_back(Boid(rP,this));
+        m_boids.push_back(this);
     }
     m_numBoids = _numBoids;
     m_sepRun = false;
