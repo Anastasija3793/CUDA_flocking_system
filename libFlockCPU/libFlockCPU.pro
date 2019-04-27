@@ -18,7 +18,7 @@ MOC_DIR=moc
 CONFIG-=app_bundle
 # Auto include all .cpp files in the project src directory (can specifiy individually if required)
 SOURCES+=$$PWD/src/Boid.cpp \
-         $$PWD/src/Flock.cpp 
+         $$PWD/src/Flock.cpp \
 #		 $$PWD/src/main.cpp
 
 #         $$PWD/src/NGLScene.cpp \

@@ -47,7 +47,7 @@ __global__ void updateKernel(float3 * _pos, float3 * _acc, float3 * _vel)
     }
 }
 
-__device__ void applyForceKernel(float3 * _force, float3 * _acc)
+__global__ void applyForceKernel(float3 * _force, float3 * _acc)
 {
     uint idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -89,7 +89,7 @@ __device__ void seekKernel(const float3 * _pos, const float3 * _vel, const float
     }
 }
 
-__device__ void separateKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
+__global__ void separateKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
 {
     //m_steer = sepVec
     // for finding sepVec
@@ -175,7 +175,7 @@ __device__ void separateKernel(float3 * _sepVec, float3 * _pos, float3 * _vel)
     }
 }
 
-__device__ void cohesionKernel(float3 * _cohVec, float3 * _pos, float3 * _vel)
+__global__ void cohesionKernel(float3 * _cohVec, float3 * _pos, float3 * _vel)
 {
     // for checking distance
     __shared__ float3 _dist[NUM_BOIDS];
@@ -227,7 +227,7 @@ __device__ void cohesionKernel(float3 * _cohVec, float3 * _pos, float3 * _vel)
     seekKernel(_pos,_vel,_cohVec,_cohVec);
 }
 
-__device__ void alignmentKernel(float3 * _aliVec, float3 * _pos, float3 * _vel)
+__global__ void alignmentKernel(float3 * _aliVec, float3 * _pos, float3 * _vel)
 {
     // for checking distance
     __shared__ float3 _dist[NUM_BOIDS];
@@ -283,31 +283,31 @@ __device__ void alignmentKernel(float3 * _aliVec, float3 * _pos, float3 * _vel)
     }
 }
 
-__global__ void flockKernel(float3 * _sepVec, float3 * _cohVec, float3 * _aliVec, float3 * _acc, float3 * _pos, float3 * _vel)
-{
-    uint idx = blockIdx.x * blockDim.x + threadIdx.x;
-    uint idy = blockIdx.y * blockDim.y + threadIdx.y;
+//__global__ void flockKernel(float3 * _cohVec, float3 * _aliVec, float3 * _acc, float3 * _pos, float3 * _vel)
+//{
+//    uint idx = blockIdx.x * blockDim.x + threadIdx.x;
+//    uint idy = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if(idx<NUM_BOIDS)
-    {
-        separateKernel(_sepVec, _pos, _vel);
-        cohesionKernel(_cohVec, _pos, _vel);
-        alignmentKernel(_aliVec, _pos, _vel);
+//    if(idx<NUM_BOIDS)
+//    {
+//        //separateKernel(_sepVec, _pos, _vel);
+//        cohesionKernel(_cohVec, _pos, _vel);
+//        alignmentKernel(_aliVec, _pos, _vel);
 
-        __syncthreads();
+//        __syncthreads();
 
-        applyForceKernel(_sepVec,_acc);
-        applyForceKernel(_cohVec,_acc);
-//        applyForceKernel(_aliVec,_acc);
+//        //applyForceKernel(_sepVec,_acc);
+//        applyForceKernel(_cohVec,_acc);
+////        applyForceKernel(_aliVec,_acc);
 
-        if(idy == 0)
-        {
-            // sum 3 rules (later)
-            //_vel[idx] = _vel[idx] + _sepVec[idx];
-            _vel[idx] += (_sepVec[idx]*1.5) + (_cohVec[idx]*1) + (_aliVec[idx]*0.02);//1
-        }
-    }
-}
+//        if(idy == 0)
+//        {
+//            // sum 3 rules (later)
+//            //_vel[idx] = _vel[idx] + _sepVec[idx];
+//            _vel[idx] += (_sepVec[idx]*1.5) + (_cohVec[idx]*1) + (_aliVec[idx]*0.02);//1
+//        }
+//    }
+//}
 
 
 

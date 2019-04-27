@@ -6,6 +6,26 @@ libFlockGPU::libFlockGPU(int _numBoids)
     m_flock = new FlockGPU(_numBoids);
 }
 
+void libFlockGPU::separate()
+{
+    m_flock->separate();
+}
+
+void libFlockGPU::align()
+{
+    m_flock->align();
+}
+
+void libFlockGPU::cohesion()
+{
+    m_flock->cohesion();
+}
+
+void libFlockGPU::flock()
+{
+    m_flock->flock();
+}
+
 void libFlockGPU::update()
 {
     m_flock->update();

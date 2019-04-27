@@ -34,7 +34,7 @@ CONFIG-=app_bundle
 SOURCES+= $$PWD/src/libFlockGPU.cpp
 
 CUDA_SOURCES += $$PWD/src/FlockGPU.cu \
-                $$PWD/src/Debug.cu
+                $$PWD/src/Debug.cu \
 #                $$PWD/src/main.cu
 
 # same for the .h files

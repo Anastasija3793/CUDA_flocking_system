@@ -20,9 +20,14 @@ public:
     FlockGPU(int _numBoids);
     ~FlockGPU();
 
+    void separate();
+    void align();
+    void cohesion();
+
+    void flock();
+
     void update();
     int randFloats(float *&devData, const size_t n);
-    //void draw();
     void dumpGeo(const uint _frameNumber);
 
 private:

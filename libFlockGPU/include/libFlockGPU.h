@@ -7,6 +7,12 @@ class libFlockGPU
 public:
     libFlockGPU(int _numBoids);
 
+    void separate();
+    void align();
+    void cohesion();
+
+    void flock();
+
     void update();
     void dumpGeo(int _frameNumber);
 

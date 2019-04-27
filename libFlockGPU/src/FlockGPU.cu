@@ -159,6 +159,14 @@ FlockGPU::FlockGPU(int _numBoids)/* : m_numBoids(_numBoids), m_dPos(m_numBoids),
                       m_dVel.begin(),
                       get3dVec());
 
+    thrust::fill(m_dAccX.begin(), m_dAccX.begin()+m_numBoids, 0);
+    thrust::fill(m_dAccY.begin(), m_dAccY.begin()+m_numBoids, 0);
+    thrust::fill(m_dAccZ.begin(), m_dAccZ.begin()+m_numBoids, 0);
+    thrust::transform(thrust::make_zip_iterator(make_tuple(m_dAccX.begin(), m_dAccY.begin(), m_dAccZ.begin())),
+                      thrust::make_zip_iterator(make_tuple(m_dAccX.end(),   m_dAccY.end(),   m_dAccZ.end())),
+                      m_dAcc.begin(),
+                      get3dVec());
+
 
     m_dPosPtr = thrust::raw_pointer_cast(&m_dPos[0]);
     m_dVelPtr = thrust::raw_pointer_cast(&m_dVel[0]);
@@ -178,6 +186,92 @@ FlockGPU::~FlockGPU()
 
 }
 
+void FlockGPU::separate()
+{
+    unsigned int M = 1024;
+    unsigned int N = m_numBoids/M + 1;
+
+    unsigned int blockN = NUM_BOIDS/32 + 1;
+    dim3 block2(32, 32); // block of (X,Y) threads
+    dim3 grid2(blockN, 1); // grid blockN * blockN blocks
+
+    thrust::fill(m_dSepX.begin(), m_dSepX.begin()+m_numBoids, 0);
+    thrust::fill(m_dSepY.begin(), m_dSepY.begin()+m_numBoids, 0);
+    thrust::fill(m_dSepZ.begin(), m_dSepZ.begin()+m_numBoids, 0);
+    thrust::transform(thrust::make_zip_iterator(make_tuple(m_dSepX.begin(), m_dSepY.begin(), m_dSepZ.begin())),
+                      thrust::make_zip_iterator(make_tuple(m_dSepX.end(),   m_dSepY.end(),   m_dSepZ.end())),
+                      m_dSep.begin(),
+                      get3dVec());
+
+    separateKernel<<<grid2,block2>>>(m_dSepPtr,m_dPosPtr,m_dVelPtr);
+    cudaThreadSynchronize();
+
+    //m_dSep*=1.5;
+    applyForceKernel<<<N,M>>>(m_dSepPtr,m_dAccPtr);
+    cudaThreadSynchronize();
+
+}
+
+void FlockGPU::align()
+{
+    //unsigned int M = 1024;
+    //unsigned int N = m_numBoids/M + 1;
+
+    unsigned int blockN = NUM_BOIDS/32 + 1;
+    dim3 block2(32, 32); // block of (X,Y) threads
+    dim3 grid2(blockN, 1); // grid blockN * blockN blocks
+
+    thrust::fill(m_dAliX.begin(), m_dAliX.begin()+m_numBoids, 0);
+    thrust::fill(m_dAliY.begin(), m_dAliY.begin()+m_numBoids, 0);
+    thrust::fill(m_dAliZ.begin(), m_dAliZ.begin()+m_numBoids, 0);
+    thrust::transform(thrust::make_zip_iterator(make_tuple(m_dAliX.begin(), m_dAliY.begin(), m_dAliZ.begin())),
+                      thrust::make_zip_iterator(make_tuple(m_dAliX.end(),   m_dAliY.end(),   m_dAliZ.end())),
+                      m_dAli.begin(),
+                      get3dVec());
+
+    alignmentKernel<<<grid2,block2>>>(m_dAliPtr,m_dPosPtr,m_dVelPtr);
+    cudaThreadSynchronize();
+
+    //m_dAli*=0.02;
+
+    //don't need this
+    //applyForceKernel<<<N,M>>>(m_dAliPtr,m_dAccPtr);
+    //cudaThreadSynchronize();
+}
+
+void FlockGPU::cohesion()
+{
+    unsigned int M = 1024;
+    unsigned int N = m_numBoids/M + 1;
+
+    unsigned int blockN = NUM_BOIDS/32 + 1;
+    dim3 block2(32, 32); // block of (X,Y) threads
+    dim3 grid2(blockN, 1); // grid blockN * blockN blocks
+
+    thrust::fill(m_dCohX.begin(), m_dCohX.begin()+m_numBoids, 0);
+    thrust::fill(m_dCohY.begin(), m_dCohY.begin()+m_numBoids, 0);
+    thrust::fill(m_dCohZ.begin(), m_dCohZ.begin()+m_numBoids, 0);
+    thrust::transform(thrust::make_zip_iterator(make_tuple(m_dCohX.begin(), m_dCohY.begin(), m_dCohZ.begin())),
+                      thrust::make_zip_iterator(make_tuple(m_dCohX.end(),   m_dCohY.end(),   m_dCohZ.end())),
+                      m_dCoh.begin(),
+                      get3dVec());
+
+    cohesionKernel<<<grid2,block2>>>(m_dCohPtr,m_dPosPtr,m_dVelPtr);
+    cudaThreadSynchronize();
+
+    //m_dCoh*=1.0;
+    applyForceKernel<<<N,M>>>(m_dCohPtr,m_dAccPtr);
+    cudaThreadSynchronize();
+}
+
+void FlockGPU::flock()
+{
+    separate();
+    align();
+    cohesion();
+}
+
+
 void FlockGPU::update()
 {
     //N - blocks; M - threads
@@ -189,53 +283,24 @@ void FlockGPU::update()
     //steerKernel<<<N,M>>>(m_dPosPtr,m_dVelPtr,m_dTargetPtr,m_dTargetPtr);
     //cudaThreadSynchronize();
 
-    unsigned int blockN = NUM_BOIDS/32 + 1;
-    dim3 block2(32, 32); // block of (X,Y) threads
-    dim3 grid2(blockN, 1); // grid blockN * blockN blocks
+    //unsigned int blockN = NUM_BOIDS/32 + 1;
+    //dim3 block2(32, 32); // block of (X,Y) threads
+    //dim3 grid2(blockN, 1); // grid blockN * blockN blocks
 
 
-    thrust::fill(m_dSepX.begin(), m_dSepX.begin()+m_numBoids, 0);
-    thrust::fill(m_dSepY.begin(), m_dSepY.begin()+m_numBoids, 0);
-    thrust::fill(m_dSepZ.begin(), m_dSepZ.begin()+m_numBoids, 0);
-    thrust::transform(thrust::make_zip_iterator(make_tuple(m_dSepX.begin(), m_dSepY.begin(), m_dSepZ.begin())),
-                      thrust::make_zip_iterator(make_tuple(m_dSepX.end(),   m_dSepY.end(),   m_dSepZ.end())),
-                      m_dSep.begin(),
-                      get3dVec());
-
-    thrust::fill(m_dCohX.begin(), m_dCohX.begin()+m_numBoids, 0);
-    thrust::fill(m_dCohY.begin(), m_dCohY.begin()+m_numBoids, 0);
-    thrust::fill(m_dCohZ.begin(), m_dCohZ.begin()+m_numBoids, 0);
-    thrust::transform(thrust::make_zip_iterator(make_tuple(m_dCohX.begin(), m_dCohY.begin(), m_dCohZ.begin())),
-                      thrust::make_zip_iterator(make_tuple(m_dCohX.end(),   m_dCohY.end(),   m_dCohZ.end())),
-                      m_dSep.begin(),
-                      get3dVec());
-
-    thrust::fill(m_dAliX.begin(), m_dAliX.begin()+m_numBoids, 0);
-    thrust::fill(m_dAliY.begin(), m_dAliY.begin()+m_numBoids, 0);
-    thrust::fill(m_dAliZ.begin(), m_dAliZ.begin()+m_numBoids, 0);
-    thrust::transform(thrust::make_zip_iterator(make_tuple(m_dAliX.begin(), m_dAliY.begin(), m_dAliZ.begin())),
-                      thrust::make_zip_iterator(make_tuple(m_dAliX.end(),   m_dAliY.end(),   m_dAliZ.end())),
-                      m_dAli.begin(),
-                      get3dVec());
-
-    thrust::fill(m_dAccX.begin(), m_dAccX.begin()+m_numBoids, 0);
-    thrust::fill(m_dAccY.begin(), m_dAccY.begin()+m_numBoids, 0);
-    thrust::fill(m_dAccZ.begin(), m_dAccZ.begin()+m_numBoids, 0);
-    thrust::transform(thrust::make_zip_iterator(make_tuple(m_dAccX.begin(), m_dAccY.begin(), m_dAccZ.begin())),
-                      thrust::make_zip_iterator(make_tuple(m_dAccX.end(),   m_dAccY.end(),   m_dAccZ.end())),
-                      m_dAcc.begin(),
-                      get3dVec());
 
 //    thrust::copy(m_dSep.begin(),m_dSep.end(),m_sep.begin());
     //reset
 //    thrust::fill(m_dSep.begin(), m_dSep.begin()+m_numBoids, 0);
 //    thrust::fill(m_sep[0].x.begin(), m_sep[0].x.begin()+m_numBoids, 0);
 
-    flockKernel<<<grid2,block2>>>(m_dSepPtr,m_dCohPtr,m_dAliPtr,m_dAccPtr,m_dPosPtr,m_dVelPtr);
-    cudaThreadSynchronize();
+//    flockKernel<<<grid2,block2>>>(m_dCohPtr,m_dAliPtr,m_dAccPtr,m_dPosPtr,m_dVelPtr);
+//    cudaThreadSynchronize();
 
     updateKernel<<<N,M>>>(m_dPosPtr,m_dAccPtr,m_dVelPtr);
     cudaThreadSynchronize();
+
+    flock();
 
     thrust::copy(m_dPos.begin(),m_dPos.end(),m_pos.begin());
 

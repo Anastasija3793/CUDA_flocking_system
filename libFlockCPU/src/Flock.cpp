@@ -8,17 +8,12 @@
 
 Flock::Flock(int _numBoids)
 {
-    //m_boids.clear();
-//    ngl::Random *rand=ngl::Random::instance();
-//    ngl::Vec3 rP = rand->getRandomVec3();
     for (int i=0; i< _numBoids; ++i)
     {
-        //auto randPos = rand->getRandomPoint(b_extents,b_extents,b_extents);
-        //m_boids.push_back(Boid(rP,this));
         m_boids.push_back(this);
     }
     m_numBoids = _numBoids;
-    m_sepRun = false;
+    //m_sepRun = false;
 }
 
 Flock::~Flock()
@@ -26,12 +21,52 @@ Flock::~Flock()
     //dctor
 }
 
-//----------------------------------------------------------------------------------------------------------------------
-//void Flock::resetBBox()
-//{
-//    m_bbox.reset( new ngl::BBox(ngl::Vec3(),80.0f,80.0f,80.0f));
-//}
-//----------------------------------------------------------------------------------------------------------------------
+//for test
+void Flock::separate()
+{
+    for(int i=0; i<m_numBoids; ++i)
+    {
+        ngl::Vec3 sep = ngl::Vec3(0.0f,0.0f,0.0f);
+        m_boids[i].separate(sep);
+        sep*=1.5;
+        //applyForce(sep);
+        m_boids[i].applyForce(sep);
+    }
+}
+
+void Flock::align()
+{
+    for(int i=0; i<m_numBoids; ++i)
+    {
+        ngl::Vec3 ali = ngl::Vec3(0.0f,0.0f,0.0f);
+        m_boids[i].align(ali);
+        ali*=0.02;
+        //m_boids[i].applyForce(ali);
+    }
+}
+
+void Flock::cohesion()
+{
+    for(int i=0; i<m_numBoids; ++i)
+    {
+        ngl::Vec3 coh = ngl::Vec3(0.0f,0.0f,0.0f);
+        m_boids[i].cohesion(coh);
+        coh*=1.0;
+        m_boids[i].applyForce(coh);
+    }
+}
+
+//for test
+void Flock::flock()
+{
+    separate();
+    align();
+    cohesion();
+//    for(int i=0; i<m_numBoids; ++i)
+//    {
+//        m_boids[i].flock();
+//    }
+}
 
 void Flock::update()
 {
@@ -39,6 +74,7 @@ void Flock::update()
     {
         m_boids[i].update();
     }
+    flock();
 }
 
 // write houdini geo file
@@ -96,55 +132,3 @@ void Flock::dumpGeo(uint _frameNumber)
             file.close();
 
 }
-
-//void Flock::draw(const std::string &_shaderName, const ngl::Mat4 &_globalMat, const ngl::Mat4 &_view, const ngl::Mat4 &_project) const
-//{
-//    for(int i=0; i<m_numBoids; ++i)
-//    {
-//        m_boids[i].draw(_shaderName, _globalMat, _view, _project);
-//    }
-//}
-//----------------------------------------------------------------------------------------------------------------------
-/*void Flock::BBoxCollision()
-{
-      //create an array of the extents of the bounding box
-      float ext[6];
-      ext[0]=ext[1]=(m_bbox->height()/2.0f);
-      ext[2]=ext[3]=(m_bbox->width()/2.0f);
-      ext[4]=ext[5]=(m_bbox->depth()/2.0f);
-      // Dot product needs a Vector so we convert The Point Temp into a Vector so we can
-      // do a dot product on it
-      ngl::Vec3 newP;
-      // D is the distance of the Agent from the Plane. If it is less than ext[i] then there is
-      // no collision
-      GLfloat dist;
-      // Loop for each boid in the vector list
-      for(Boid &b : m_boids)
-      {
-        newP=b.getPos();
-        //Now we need to check the Boid agains all 6 planes of the BBOx
-        //If a collision is found we change the dir of the Boid then Break
-        for(int i=0; i<6; ++i)
-        {
-          //to calculate the distance we take the dotporduct of the Plane Normal
-          //with the new point P
-          dist=m_bbox->getNormalArray()[i].dot(newP);
-          //Now Add the Radius of the Boid to the offsett
-          dist+=b.getRadius();
-          // If this is greater or equal to the BBox extent /2 then there is a collision
-          //So we calculate the Boids new direction
-          if(dist >=ext[i])
-          {
-            //We use the same calculation as in raytracing to determine the
-            // the new direction
-            GLfloat x= 2*( b.getVel().dot((m_bbox->getNormalArray()[i])));
-            ngl::Vec3 d =m_bbox->getNormalArray()[i]*x;
-            b.setVel(b.getVel()-d);
-            b.setHit();
-            //180 to make it rotate "inside"
-            //b.m_angle+=180;
-          }//end of hit test
-         }//end of each face test
-        }//end of for
-}*/
-//----------------------------------------------------------------------------------------------------------------------
