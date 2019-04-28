@@ -207,6 +207,15 @@ void FlockGPU::separate()
     cudaThreadSynchronize();
 
     //m_dSep*=1.5;
+    //thrust::copy(m_dPos.begin(),m_dPos.end(),m_pos.begin());
+    std::vector<float3>m_sep(m_numBoids);
+    thrust::copy(m_dSep.begin(),m_dSep.end(),m_sep.begin());
+    for(unsigned int i=0; i<m_numBoids; ++i)
+    {
+        m_sep[i]*=1.5;
+    }
+    m_dSep = m_sep;
+
     applyForceKernel<<<N,M>>>(m_dSepPtr,m_dAccPtr);
     cudaThreadSynchronize();
 
@@ -233,6 +242,13 @@ void FlockGPU::align()
     cudaThreadSynchronize();
 
     //m_dAli*=0.02;
+    std::vector<float3>m_ali(m_numBoids);
+    thrust::copy(m_dAli.begin(),m_dAli.end(),m_ali.begin());
+    for(unsigned int i=0; i<m_numBoids; ++i)
+    {
+        m_ali[i]*=0.02;
+    }
+    m_dAli = m_ali;
 
     //don't need this
     //applyForceKernel<<<N,M>>>(m_dAliPtr,m_dAccPtr);
@@ -260,6 +276,14 @@ void FlockGPU::cohesion()
     cudaThreadSynchronize();
 
     //m_dCoh*=1.0;
+    std::vector<float3>m_coh(m_numBoids);
+    thrust::copy(m_dCoh.begin(),m_dCoh.end(),m_coh.begin());
+    for(unsigned int i=0; i<m_numBoids; ++i)
+    {
+        m_coh[i]*=1.0;
+    }
+    m_dCoh = m_coh;
+
     applyForceKernel<<<N,M>>>(m_dCohPtr,m_dAccPtr);
     cudaThreadSynchronize();
 }
