@@ -1,15 +1,12 @@
 include(../common.pri)
 
 # This specifies the exe name
-TARGET = FlockGPU
+TARGET=gpuTests
 
-TEMPLATE = lib
 # where to put the .o files
-OBJECTS_DIR=obj
-CUDA_OBJECTS_DIR = cudaobj
+#OBJECTS_DIR=obj
 # core Qt Libs to use add more here if needed.
-QT+=gui opengl
-QT -= core
+QT+=gui opengl core
 # as I want to support 4.8 and 5 this will set a flag for some of the mac stuff
 # mainly in the types.h file for the setMacVisual which is native in Qt5
 isEqual(QT_MAJOR_VERSION, 5) {
@@ -17,7 +14,6 @@ isEqual(QT_MAJOR_VERSION, 5) {
 	DEFINES +=QT5BUILD
 }
 
-#DEFINES += THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA
 QMAKE_CXXFLAGS += -std=c++11 -fPIC -Wall -Wextra -pedantic
 
 CUDA_COMPUTE_ARCH=${CUDA_ARCH}
@@ -31,27 +27,33 @@ isEmpty(CUDA_COMPUTE_ARCH) {
 CONFIG-=app_bundle
 
 # Auto include all .cpp files in the project src directory (can specifiy individually if required)
-SOURCES+= $$PWD/src/libFlockGPU.cpp
+HEADERS += \
+    $$PWD/src/*.cuh
 
-CUDA_SOURCES += $$PWD/src/FlockGPU.cu \
-                $$PWD/src/Debug.cu \
-#                $$PWD/src/main.cu
+SOURCES += $$PWD/src/*.cpp
 
-# same for the .h files
-HEADERS+= $$PWD/include/FlockGPU.cuh \
-          $$PWD/include/Debug.cuh \
-          $$PWD/include/BoidGPUKernels.cuh \
-          $$PWD/include/libFlockGPU.h
 
 # and add the include dir into the search path for Qt and make
-INCLUDEPATH +=./include
+INCLUDEPATH +=./include \
+                ../../libFlockGPU/include \
+                /public/devel/2018/include/gtest
 # where our exe is going to live (root of project)
 DESTDIR=./
 # add the glsl shader files
-#OTHER_FILES+=README.md
+OTHER_FILES+=README.md
 # were are going to default to a console app
 CONFIG += console \
-           c++11
+            c++11
+
+
+LIBS += -lgtest -pthread
+LIBS += -L../../libFlockGPU -lFlockGPU
+LIBS += -L/public/devel/2018/lib64 -lgtest -lpthread
+
+QMAKE_RPATHDIR += ../../libFlockGPU
+
+
+CUDA_SOURCES += $$files($$PWD/src/*.cu)
 
 #NGLPATH=$$(NGLDIR)
 #isEmpty(NGLPATH){ # note brace must be here

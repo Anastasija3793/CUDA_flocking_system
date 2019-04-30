@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 
-//const static int b_extents=20;
+
 
 Flock::Flock(int _numBoids)
 {
@@ -13,7 +13,6 @@ Flock::Flock(int _numBoids)
         m_boids.push_back(this);
     }
     m_numBoids = _numBoids;
-    //m_sepRun = false;
 }
 
 Flock::~Flock()
@@ -21,11 +20,11 @@ Flock::~Flock()
     //dctor
 }
 
-//for test
 void Flock::separate()
 {
     for(int i=0; i<m_numBoids; ++i)
     {
+        //ngl::Vec3 sep = m_boids[i].m_sep;
         ngl::Vec3 sep = ngl::Vec3(0.0f,0.0f,0.0f);
         m_boids[i].separate(sep);
         sep*=1.5;
@@ -41,6 +40,7 @@ void Flock::align()
         ngl::Vec3 ali = ngl::Vec3(0.0f,0.0f,0.0f);
         m_boids[i].align(ali);
         ali*=0.02;
+        //don't need applyForce in order to achieve fireflies effect
         //m_boids[i].applyForce(ali);
     }
 }
@@ -56,16 +56,11 @@ void Flock::cohesion()
     }
 }
 
-//for test
 void Flock::flock()
 {
     separate();
     align();
     cohesion();
-//    for(int i=0; i<m_numBoids; ++i)
-//    {
-//        m_boids[i].flock();
-//    }
 }
 
 void Flock::update()

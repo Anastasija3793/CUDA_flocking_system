@@ -204,7 +204,7 @@ void FlockGPU::separate()
                       get3dVec());
 
     separateKernel<<<grid2,block2>>>(m_dSepPtr,m_dPosPtr,m_dVelPtr);
-    cudaThreadSynchronize();
+    cudaDeviceSynchronize();
 
     //m_dSep*=1.5;
     //thrust::copy(m_dPos.begin(),m_dPos.end(),m_pos.begin());
@@ -217,7 +217,7 @@ void FlockGPU::separate()
     m_dSep = m_sep;
 
     applyForceKernel<<<N,M>>>(m_dSepPtr,m_dAccPtr);
-    cudaThreadSynchronize();
+    cudaDeviceSynchronize();
 
 }
 
@@ -239,7 +239,8 @@ void FlockGPU::align()
                       get3dVec());
 
     alignmentKernel<<<grid2,block2>>>(m_dAliPtr,m_dPosPtr,m_dVelPtr);
-    cudaThreadSynchronize();
+    //cudaThreadSynchronize();
+    cudaDeviceSynchronize();
 
     //m_dAli*=0.02;
     std::vector<float3>m_ali(m_numBoids);
@@ -250,6 +251,7 @@ void FlockGPU::align()
     }
     m_dAli = m_ali;
 
+    cudaDeviceSynchronize();
     //don't need this
     //applyForceKernel<<<N,M>>>(m_dAliPtr,m_dAccPtr);
     //cudaThreadSynchronize();
@@ -273,7 +275,7 @@ void FlockGPU::cohesion()
                       get3dVec());
 
     cohesionKernel<<<grid2,block2>>>(m_dCohPtr,m_dPosPtr,m_dVelPtr);
-    cudaThreadSynchronize();
+    cudaDeviceSynchronize();
 
     //m_dCoh*=1.0;
     std::vector<float3>m_coh(m_numBoids);
@@ -285,7 +287,7 @@ void FlockGPU::cohesion()
     m_dCoh = m_coh;
 
     applyForceKernel<<<N,M>>>(m_dCohPtr,m_dAccPtr);
-    cudaThreadSynchronize();
+    cudaDeviceSynchronize();
 }
 
 void FlockGPU::flock()
@@ -322,11 +324,13 @@ void FlockGPU::update()
 //    cudaThreadSynchronize();
 
     updateKernel<<<N,M>>>(m_dPosPtr,m_dAccPtr,m_dVelPtr);
-    cudaThreadSynchronize();
+//    cudaThreadSynchronize();
 
     flock();
 
     thrust::copy(m_dPos.begin(),m_dPos.end(),m_pos.begin());
+
+    cudaDeviceSynchronize();
 
     //print
 //    thrust::copy(m_dPosX.begin(),m_dPosX.end(),xTest.begin());

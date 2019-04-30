@@ -21,6 +21,8 @@ public:
 
     int m_numBoids;
     std::vector<Boid>m_boids;
+
+//    ngl::Vec3 sep = ngl::Vec3(0.0f,0.0f,0.0f);
 };
 
 #endif // FLOCK_H

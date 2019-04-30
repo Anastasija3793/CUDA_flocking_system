@@ -15,9 +15,19 @@ Boid::Boid(Flock *_flock)
     m_pos = ngl::Vec3((float(rand())/RAND_MAX), (float(rand())/RAND_MAX), (float(rand())/RAND_MAX));
     m_vel=ngl::Vec3((float(rand())/RAND_MAX), (float(rand())/RAND_MAX), (float(rand())/RAND_MAX));
 
-    m_acc = ngl::Vec3(0.0f,0.0f,0.0f);
-    max_speed = 1; //3
-    max_force = 0.03; //0.05
+    m_flock=_flock;
+}
+
+Boid::Boid(ngl::Vec3 _pos, ngl::Vec3 _vel)
+{
+    m_pos = _pos;
+    m_vel = _vel;
+}
+
+Boid::Boid(ngl::Vec3 _pos, ngl::Vec3 _vel, Flock *_flock)
+{
+    m_pos = _pos;
+    m_vel = _vel;
 
     m_flock=_flock;
 }
@@ -27,33 +37,10 @@ void Boid::applyForce(ngl::Vec3 _force)
     m_acc+=_force;
 }
 
-//void Boid::flock()
-//{
-//    //3 rules
-//    //ngl::Vec3 sep = ngl::Vec3(0.0f,0.0f,0.0f);
-//    //ngl::Vec3 ali = ngl::Vec3(0.0f,0.0f,0.0f);
-//    //ngl::Vec3 coh = ngl::Vec3(0.0f,0.0f,0.0f);
-//    //ngl::Vec3 sep = separate();
-//    //ngl::Vec3 ali = align();
-//    //ngl::Vec3 coh = cohesion();
-
-//    //separate(sep);
-//    //align(ali);
-//    //cohesion(coh);
-
-//    //sep*=1.5;
-//    //ali*=0.02;
-//    //coh*=1.0;
-
-//    //applyForce(sep);
-////    applyForce(ali);
-//    //applyForce(coh);
-//}
-
 
 void Boid::seek(ngl::Vec3& _target)
 {
-    //m_target = _target;
+    m_target = _target;
     m_desired = _target - m_pos;
     // Scale to maximum speed
     m_desired.normalize();
@@ -71,6 +58,7 @@ void Boid::seek(ngl::Vec3& _target)
 
 void Boid::separate(ngl::Vec3& _sepVec)
 {
+    //m_sep = _sepVec;
     //m_steer = ngl::Vec3(0.0f,0.0f,0.0f);
     int count = 0;
     // For every boid check if too close
@@ -154,7 +142,6 @@ void Boid::cohesion(ngl::Vec3& _cohVec)
 
 void Boid::update()
 {
-    //flock();
     m_vel+=m_acc;
 
     // limit velocity by max_speed

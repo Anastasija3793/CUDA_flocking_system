@@ -5,7 +5,7 @@
 #include "Flock.h"
 #include "libFlockGPU.h"
 
-//----------------------------------10---BOIDS------------------------------------------------------------------------
+//----------------------------------30---BOIDS------------------------------------------------------------------------
 static void FlockCPU_30_Update(benchmark::State& state)
 {
     Flock FlockCPU(30);
@@ -23,15 +23,10 @@ static void FlockGPU_30_Update(benchmark::State& state)
 
     for(auto _ : state)
     {
-        auto start = std::chrono::high_resolution_clock::now();
         FlockGPU.update();
-        auto end   = std::chrono::high_resolution_clock::now();
-
-        auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-        state.SetIterationTime(elapsed_seconds.count());
     }
 }
-BENCHMARK(FlockGPU_30_Update)->UseManualTime();
+BENCHMARK(FlockGPU_30_Update);
 
 
 
@@ -52,15 +47,10 @@ static void FlockGPU_30_Flock(benchmark::State& state)
 
     for(auto _ : state)
     {
-        auto start = std::chrono::high_resolution_clock::now();
         FlockGPU.flock();
-        auto end   = std::chrono::high_resolution_clock::now();
-
-        auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-        state.SetIterationTime(elapsed_seconds.count());
     }
 }
-BENCHMARK(FlockGPU_30_Flock)->UseManualTime();
+BENCHMARK(FlockGPU_30_Flock);
 
 
 
@@ -81,15 +71,10 @@ static void FlockGPU_30_Separate(benchmark::State& state)
 
     for(auto _ : state)
     {
-        auto start = std::chrono::high_resolution_clock::now();
         FlockGPU.separate();
-        auto end   = std::chrono::high_resolution_clock::now();
-
-        auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-        state.SetIterationTime(elapsed_seconds.count());
     }
 }
-BENCHMARK(FlockGPU_30_Separate)->UseManualTime();
+BENCHMARK(FlockGPU_30_Separate);
 
 
 
@@ -110,15 +95,10 @@ static void FlockGPU_30_Align(benchmark::State& state)
 
     for(auto _ : state)
     {
-        auto start = std::chrono::high_resolution_clock::now();
         FlockGPU.align();
-        auto end   = std::chrono::high_resolution_clock::now();
-
-        auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-        state.SetIterationTime(elapsed_seconds.count());
     }
 }
-BENCHMARK(FlockGPU_30_Align)->UseManualTime();
+BENCHMARK(FlockGPU_30_Align);
 
 
 
@@ -139,17 +119,12 @@ static void FlockGPU_30_Cohesion(benchmark::State& state)
 
     for(auto _ : state)
     {
-        auto start = std::chrono::high_resolution_clock::now();
         FlockGPU.cohesion();
-        auto end   = std::chrono::high_resolution_clock::now();
-
-        auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-        state.SetIterationTime(elapsed_seconds.count());
     }
 }
-BENCHMARK(FlockGPU_30_Cohesion)->UseManualTime();
+BENCHMARK(FlockGPU_30_Cohesion);
 
-//----------------------------------10---BOIDS------------------------------------------------------------------------
+//----------------------------------30---BOIDS------------------------------------------------------------------------
 
 
 
@@ -172,15 +147,10 @@ static void FlockGPU_100_Update(benchmark::State& state)
 
     for(auto _ : state)
     {
-        auto start = std::chrono::high_resolution_clock::now();
         FlockGPU.update();
-        auto end   = std::chrono::high_resolution_clock::now();
-
-        auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-        state.SetIterationTime(elapsed_seconds.count());
     }
 }
-BENCHMARK(FlockGPU_100_Update)->UseManualTime();
+BENCHMARK(FlockGPU_100_Update);
 
 
 
@@ -201,15 +171,10 @@ static void FlockGPU_100_Flock(benchmark::State& state)
 
     for(auto _ : state)
     {
-        auto start = std::chrono::high_resolution_clock::now();
         FlockGPU.flock();
-        auto end   = std::chrono::high_resolution_clock::now();
-
-        auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-        state.SetIterationTime(elapsed_seconds.count());
     }
 }
-BENCHMARK(FlockGPU_100_Flock)->UseManualTime();
+BENCHMARK(FlockGPU_100_Flock);
 
 
 
@@ -230,15 +195,10 @@ static void FlockGPU_100_Separate(benchmark::State& state)
 
     for(auto _ : state)
     {
-        auto start = std::chrono::high_resolution_clock::now();
         FlockGPU.separate();
-        auto end   = std::chrono::high_resolution_clock::now();
-
-        auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-        state.SetIterationTime(elapsed_seconds.count());
     }
 }
-BENCHMARK(FlockGPU_100_Separate)->UseManualTime();
+BENCHMARK(FlockGPU_100_Separate);
 
 
 
@@ -259,15 +219,10 @@ static void FlockGPU_100_Align(benchmark::State& state)
 
     for(auto _ : state)
     {
-        auto start = std::chrono::high_resolution_clock::now();
         FlockGPU.align();
-        auto end   = std::chrono::high_resolution_clock::now();
-
-        auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-        state.SetIterationTime(elapsed_seconds.count());
     }
 }
-BENCHMARK(FlockGPU_100_Align)->UseManualTime();
+BENCHMARK(FlockGPU_100_Align);
 
 
 
@@ -288,177 +243,136 @@ static void FlockGPU_100_Cohesion(benchmark::State& state)
 
     for(auto _ : state)
     {
-        auto start = std::chrono::high_resolution_clock::now();
         FlockGPU.cohesion();
-        auto end   = std::chrono::high_resolution_clock::now();
-
-        auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-        state.SetIterationTime(elapsed_seconds.count());
     }
 }
-BENCHMARK(FlockGPU_100_Cohesion)->UseManualTime();
-
-//static void FlockGPU_Update_100(benchmark::State& state)
-//{
-//    libFlockGPU FlockGPU(100);
-
-//    for(auto _ : state)
-//    {
-//        FlockGPU.update();
-//    }
-//}
-//BENCHMARK(FlockGPU_Update_100);
+BENCHMARK(FlockGPU_100_Cohesion);
 
 //----------------------------------100---BOIDS------------------------------------------------------------------------
 
 
 
 
-//----------------------------------10000---BOIDS------------------------------------------------------------------------
-static void FlockCPU_10000_Update(benchmark::State& state)
+//----------------------------------1000---BOIDS------------------------------------------------------------------------
+static void FlockCPU_1000_Update(benchmark::State& state)
 {
-    Flock FlockCPU(10000);
+    Flock FlockCPU(1000);
 
     for(auto _ : state)
     {
         FlockCPU.update();
     }
 }
-BENCHMARK(FlockCPU_10000_Update);
+BENCHMARK(FlockCPU_1000_Update);
 
-static void FlockGPU_10000_Update(benchmark::State& state)
+static void FlockGPU_1000_Update(benchmark::State& state)
 {
-    libFlockGPU FlockGPU(10000);
+    libFlockGPU FlockGPU(1000);
 
     for(auto _ : state)
     {
-        auto start = std::chrono::high_resolution_clock::now();
         FlockGPU.update();
-        auto end   = std::chrono::high_resolution_clock::now();
-
-        auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-        state.SetIterationTime(elapsed_seconds.count());
     }
 }
-BENCHMARK(FlockGPU_10000_Update)->UseManualTime();
+BENCHMARK(FlockGPU_1000_Update);
 
 
 
-static void FlockCPU_10000_Flock(benchmark::State& state)
+static void FlockCPU_1000_Flock(benchmark::State& state)
 {
-    Flock FlockCPU(10000);
+    Flock FlockCPU(1000);
 
     for(auto _ : state)
     {
         FlockCPU.flock();
     }
 }
-BENCHMARK(FlockCPU_10000_Flock);
+BENCHMARK(FlockCPU_1000_Flock);
 
-static void FlockGPU_10000_Flock(benchmark::State& state)
+static void FlockGPU_1000_Flock(benchmark::State& state)
 {
-    libFlockGPU FlockGPU(10000);
+    libFlockGPU FlockGPU(1000);
 
     for(auto _ : state)
     {
-        auto start = std::chrono::high_resolution_clock::now();
         FlockGPU.flock();
-        auto end   = std::chrono::high_resolution_clock::now();
-
-        auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-        state.SetIterationTime(elapsed_seconds.count());
     }
 }
-BENCHMARK(FlockGPU_10000_Flock)->UseManualTime();
+BENCHMARK(FlockGPU_1000_Flock);
 
 
 
-static void FlockCPU_10000_Separate(benchmark::State &state)
+static void FlockCPU_1000_Separate(benchmark::State &state)
 {
-    Flock FlockCPU(10000);
+    Flock FlockCPU(1000);
 
     for(auto _ : state)
     {
         FlockCPU.separate();
     }
 }
-BENCHMARK(FlockCPU_10000_Separate);
+BENCHMARK(FlockCPU_1000_Separate);
 
-static void FlockGPU_10000_Separate(benchmark::State& state)
+static void FlockGPU_1000_Separate(benchmark::State& state)
 {
-    libFlockGPU FlockGPU(10000);
+    libFlockGPU FlockGPU(1000);
 
     for(auto _ : state)
     {
-        auto start = std::chrono::high_resolution_clock::now();
         FlockGPU.separate();
-        auto end   = std::chrono::high_resolution_clock::now();
-
-        auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-        state.SetIterationTime(elapsed_seconds.count());
     }
 }
-BENCHMARK(FlockGPU_10000_Separate)->UseManualTime();
+BENCHMARK(FlockGPU_1000_Separate);
 
 
 
-static void FlockCPU_10000_Align(benchmark::State &state)
+static void FlockCPU_1000_Align(benchmark::State &state)
 {
-    Flock FlockCPU(10000);
+    Flock FlockCPU(1000);
 
     for(auto _ : state)
     {
         FlockCPU.align();
     }
 }
-BENCHMARK(FlockCPU_10000_Align);
+BENCHMARK(FlockCPU_1000_Align);
 
-static void FlockGPU_10000_Align(benchmark::State& state)
+static void FlockGPU_1000_Align(benchmark::State& state)
 {
-    libFlockGPU FlockGPU(10000);
+    libFlockGPU FlockGPU(1000);
 
     for(auto _ : state)
     {
-        auto start = std::chrono::high_resolution_clock::now();
         FlockGPU.align();
-        auto end   = std::chrono::high_resolution_clock::now();
-
-        auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-        state.SetIterationTime(elapsed_seconds.count());
     }
 }
-BENCHMARK(FlockGPU_10000_Align)->UseManualTime();
+BENCHMARK(FlockGPU_1000_Align);
 
 
 
-static void FlockCPU_10000_Cohesion(benchmark::State &state)
+static void FlockCPU_1000_Cohesion(benchmark::State &state)
 {
-    Flock FlockCPU(10000);
+    Flock FlockCPU(1000);
 
     for(auto _ : state)
     {
         FlockCPU.cohesion();
     }
 }
-BENCHMARK(FlockCPU_10000_Cohesion);
+BENCHMARK(FlockCPU_1000_Cohesion);
 
-static void FlockGPU_10000_Cohesion(benchmark::State& state)
+static void FlockGPU_1000_Cohesion(benchmark::State& state)
 {
-    libFlockGPU FlockGPU(10000);
+    libFlockGPU FlockGPU(1000);
 
     for(auto _ : state)
     {
-        auto start = std::chrono::high_resolution_clock::now();
         FlockGPU.cohesion();
-        auto end   = std::chrono::high_resolution_clock::now();
-
-        auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-        state.SetIterationTime(elapsed_seconds.count());
     }
 }
-BENCHMARK(FlockGPU_10000_Cohesion)->UseManualTime();
+BENCHMARK(FlockGPU_1000_Cohesion);
 
-//----------------------------------10000---BOIDS------------------------------------------------------------------------
+//----------------------------------1000---BOIDS------------------------------------------------------------------------
 
 
 

@@ -32,10 +32,18 @@ OTHER_FILES+=README.md
 # were are going to default to a console app
 CONFIG += console
 
-LIBS += -L../libFlockCPU -lFlockCPU
-LIBS += -L../libFlockGPU -lFlockGPU
+LIBS += -L"../libFlockCPU" -lFlockCPU
+LIBS += -L"../libFlockGPU" -lFlockGPU
 LIBS += -L/public/devel/2018/lib64 -lgtest -lpthread
 LIBS += -L/public/devel/2018/lib -lbenchmark
+
+#LIBS += -L/public/devel/2018/lib64 -lgtest -lpthread \
+#        -L$$LIB_INSTALL_DIR -lFlockCPU -lFlockGPU \
+#        -L/public/devel/2018/lib -lbenchmark        
+
+#QMAKE_RPATHDIR += $$LIB_INSTALL_DIR
+QMAKE_RPATHDIR += ../libFlockCPU \
+               ../libFlockGPU
 
 NGLPATH=$$(NGLDIR)
 isEmpty(NGLPATH){ # note brace must be here

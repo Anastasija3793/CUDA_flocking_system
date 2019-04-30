@@ -34,7 +34,11 @@ CONFIG += console
 
 LIBS += -L../libFlockCPU -lFlockCPU #-llibFlockGPU
 LIBS += -L../libFlockGPU -lFlockGPU
+#LIBS += -L$$LIB_INSTALL_DIR -lFlockCPU -lFlockGPU
 
+#QMAKE_RPATHDIR += $$LIB_INSTALL_DIR
+QMAKE_RPATHDIR += ../libFlockCPU \
+               ../libFlockGPU
 
 NGLPATH=$$(NGLDIR)
 isEmpty(NGLPATH){ # note brace must be here

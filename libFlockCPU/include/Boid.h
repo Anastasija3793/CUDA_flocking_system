@@ -18,6 +18,11 @@ class Boid
 {
 public:
     Boid(Flock *_flock);
+    Boid(ngl::Vec3 _pos, ngl::Vec3 _vel);
+    Boid(ngl::Vec3 _pos, ngl::Vec3 _vel, Flock *_flock);
+    Boid(ngl::Vec3 _pos, ngl::Vec3 _vel, ngl::Vec3 _target);
+    //Boid(ngl::Vec3 _pos, ngl::Vec3 _vel, ngl::Vec3 _acc);
+
     void update();
 
     /// @brief getPos function gets the position
@@ -25,6 +30,7 @@ public:
     //----------------------------------------------------------------------------------------------------------------------
     inline ngl::Vec3 getPos() const {return m_pos;}
     //----------------------------------------------------------------------------------------------------------------------
+    //inline ngl::Vec3 getVel() const {return m_vel;}
 
     void applyForce(ngl::Vec3 _force);
 
@@ -36,23 +42,25 @@ public:
     //ngl::Vec3 align();
     //ngl::Vec3 cohesion();
 
+
     void flock();
 
-private:
+//private:
 
     ngl::Vec3 m_force;
     ngl::Vec3 m_steer;
 
     ngl::Vec3 m_pos;
     ngl::Vec3 m_vel;
-    float max_speed;
+    float max_speed = 1.0f;
 
     ngl::Vec3 m_rotation;
     ngl::Vec3 m_target;
 
-    ngl::Vec3 m_acc;
+    ngl::Vec3 m_acc = ngl::Vec3(0.0f,0.0f,0.0f);
+    ngl::Vec3 m_sep = ngl::Vec3(0.0f,0.0f,0.0f);
 
-    float max_force;
+    float max_force = 0.03f;
     ngl::Vec3 m_desired;
 
     float m_sepRad = 15.0f; //25
