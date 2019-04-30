@@ -1,7 +1,7 @@
 # CUDA Fireflies Flocking System
 
 <p align="center">
-  <img width="256" height="256" src="Images/gpu.gif">
+  <img width="360" height="202" src="Images/gpu.gif">
 </p>
 
 ## Project Overview
