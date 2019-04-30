@@ -47,8 +47,8 @@ The parallel implementation of the flocking system is faster than the serial ver
 
 ## Results
 Benchmarked on:
-- CPU
-- GPU
+- CPU: Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz x 8
+- GPU: NVIDIA GTX 1080
 
 ### 30 Boids
 |      Benchmark       |      Time      |     CPU       | Iterations |
