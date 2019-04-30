@@ -1,7 +1,10 @@
-include(../common.pri)
+include(../../common.pri)
 
 # This specifies the exe name
 TARGET=gpuTests
+
+OBJECTS_DIR = obj
+CUDA_OBJECTS_DIR = cudaobj
 
 # where to put the .o files
 #OBJECTS_DIR=obj
@@ -27,8 +30,8 @@ isEmpty(CUDA_COMPUTE_ARCH) {
 CONFIG-=app_bundle
 
 # Auto include all .cpp files in the project src directory (can specifiy individually if required)
-HEADERS += \
-    $$PWD/src/*.cuh
+#HEADERS += \
+#    $$PWD/src/*.cuh
 
 SOURCES += $$PWD/src/*.cpp
 
@@ -46,7 +49,7 @@ CONFIG += console \
             c++11
 
 
-LIBS += -lgtest -pthread
+#LIBS += -lgtest -pthread
 LIBS += -L../../libFlockGPU -lFlockGPU
 LIBS += -L/public/devel/2018/lib64 -lgtest -lpthread
 
@@ -64,4 +67,4 @@ CUDA_SOURCES += $$files($$PWD/src/*.cu)
 #	message("Using custom NGL location")
 #	include($(NGLDIR)/UseNGL.pri)
 #}
-include(../cuda_compiler.pri)
+include(../../cuda_compiler.pri)

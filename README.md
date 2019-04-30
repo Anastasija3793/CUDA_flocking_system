@@ -8,6 +8,28 @@
 
 Final year CUDA assignment representing fireflies flocking system. The serialized code is based on [2nd year assignment](https://github.com/Anastasija3793/FlockingSystem) and influenced by Craig Reynolds' work. However, it is modified in order to achieve the behaviour similar to a flock of fireflies.
 
+### Configuration
+The following environment variables are needed to compile this out of the box:
+- CUDA_PATH : Needs to point to the base directory of your cuda lib and includes
+- CUDA_ARCH : Your local device compute (e.g. 30 or 52 or whatever)
+- HOST_COMPILER : Your local g++ compiler (compatible with cuda compiles, g++ 4.9)
+
+In order to compile and run the application:
+```
+  cd <project_path>/CUDA_flocking_system
+  make clean
+  qmake
+  make -j
+```
+
+After compiling do:
+```
+  cd FlockingSystemDemo
+  ./FlockingSystemDemo
+```
+
+Geo files (CPU and GPU version) will be created in a geo/ folder. You can then use these files in Houdini software.
+
 ### Dependencies
 - [NGL](https://github.com/NCCA/NGL) (serialized code only)
 - [Qt](https://www.qt.io/) (qmake - version 5)
@@ -35,9 +57,12 @@ The fireflies flocking system is based around three main rules of any flocking s
 - Alignment
 - Cohesion
 
-Optimizing these rules would lead to speeding up the whole flocking system.
+Each boid looking for its neighbour within specified neigbhourhood radius. As soon as the boid finds the neigbhbour(s), it tends to steer away. When it achieves a safe distance, it steers back towards the centre to its original target. This creates the dancing effect of fireflies. Each rule has its specific algorithm. Optimizing these rules would lead to speeding up the whole flocking system.
 
-Runing FlockingSystemDemo will allow to export the position of boids as .geo files for both CPU and GPU implementations. These files can be then imported in Houdini for easier visualization.
+### Structure
+GPU library wrapped up in [libFlockGPU.h](https://github.com/Anastasija3793/CUDA_flocking_system/blob/master/libFlockGPU/include/libFlockGPU.h) for easier usage/testing/navigating. The class is implemented in [FlockGPU.cu](https://github.com/Anastasija3793/CUDA_flocking_system/blob/master/libFlockGPU/src/FlockGPU.cu), however all kernel functions are implemented in [BoidGPUKernels.cuh](https://github.com/Anastasija3793/CUDA_flocking_system/blob/master/libFlockGPU/include/BoidGPUKernels.cuh).
+
+Runing FlockingSystemDemo allows to export the position of boids as .geo files for both CPU and GPU implementations. These files can be then imported in Houdini for easier visualization.
 
 #### Communication between threads
 Communication between threads was achieved by using shared memory.

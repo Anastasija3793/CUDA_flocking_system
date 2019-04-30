@@ -1,8 +1,4 @@
 #include <gtest/gtest.h>
-//#include <ngl/Vec3.h>
-
-#include "libFlockGPU.h"
-
 
 int main(int argc, char **argv)
 {

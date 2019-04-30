@@ -6,24 +6,26 @@
 #include <ngl/VAOPrimitives.h>
 #include <math.h>
 
-//#include <iostream>
 #define PI = 3.14159
-
 
 Boid::Boid(Flock *_flock)
 {
     m_pos = ngl::Vec3((float(rand())/RAND_MAX), (float(rand())/RAND_MAX), (float(rand())/RAND_MAX));
-    m_vel=ngl::Vec3((float(rand())/RAND_MAX), (float(rand())/RAND_MAX), (float(rand())/RAND_MAX));
+    m_vel = ngl::Vec3((float(rand())/RAND_MAX), (float(rand())/RAND_MAX), (float(rand())/RAND_MAX));
 
     m_flock=_flock;
 }
-
+//----------------------------------------------------------------------------------------------------------------------
+/// @brief another constructor for testing
+//----------------------------------------------------------------------------------------------------------------------
 Boid::Boid(ngl::Vec3 _pos, ngl::Vec3 _vel)
 {
     m_pos = _pos;
     m_vel = _vel;
 }
-
+//----------------------------------------------------------------------------------------------------------------------
+/// @brief another constructor for testing
+//----------------------------------------------------------------------------------------------------------------------
 Boid::Boid(ngl::Vec3 _pos, ngl::Vec3 _vel, Flock *_flock)
 {
     m_pos = _pos;
@@ -31,13 +33,12 @@ Boid::Boid(ngl::Vec3 _pos, ngl::Vec3 _vel, Flock *_flock)
 
     m_flock=_flock;
 }
-
+//----------------------------------------------------------------------------------------------------------------------
 void Boid::applyForce(ngl::Vec3 _force)
 {
     m_acc+=_force;
 }
-
-
+//----------------------------------------------------------------------------------------------------------------------
 void Boid::seek(ngl::Vec3& _target)
 {
     m_target = _target;
@@ -52,14 +53,10 @@ void Boid::seek(ngl::Vec3& _target)
     {
         _target = (_target/_target.length())*max_force;
     }
-    //_target = m_steer;
-    //return m_steer;
 }
-
+//----------------------------------------------------------------------------------------------------------------------
 void Boid::separate(ngl::Vec3& _sepVec)
 {
-    //m_sep = _sepVec;
-    //m_steer = ngl::Vec3(0.0f,0.0f,0.0f);
     int count = 0;
     // For every boid check if too close
     for(unsigned int i = 0; i<m_flock->m_boids.size(); ++i)
@@ -78,25 +75,22 @@ void Boid::separate(ngl::Vec3& _sepVec)
     if(count>0)
     {
         _sepVec/=(float(count));
-        //m_steer/=count;
     }
     if(_sepVec.length()>0)
     {
         _sepVec.normalize();
         _sepVec*=max_speed;
         _sepVec-=m_vel;
-        //limit by max_force
+        // Limit to maximum force
         if(_sepVec.length() > max_force)
         {
             _sepVec = (_sepVec/_sepVec.length())*max_force;
         }
     }
-    //return m_steer;
 }
-
+//----------------------------------------------------------------------------------------------------------------------
 void Boid::align(ngl::Vec3& _aliVec)
 {
-    //ngl::Vec3 sum = ngl::Vec3(0.0f,0.0f,0.0f);
     int count = 0;
     for(unsigned int i = 0; i<m_flock->m_boids.size(); ++i)
     {
@@ -116,12 +110,10 @@ void Boid::align(ngl::Vec3& _aliVec)
         _aliVec = _aliVec - m_vel;
 
     }
-    //return m_steer;
 }
-
+//----------------------------------------------------------------------------------------------------------------------
 void Boid::cohesion(ngl::Vec3& _cohVec)
 {
-    //ngl::Vec3 sum = ngl::Vec3(0.0f,0.0f,0.0f);
     int count = 0;
     for(unsigned int i = 0; i<m_flock->m_boids.size(); ++i)
     {
@@ -139,12 +131,12 @@ void Boid::cohesion(ngl::Vec3& _cohVec)
     }
     seek(_cohVec);
 }
-
+//----------------------------------------------------------------------------------------------------------------------
 void Boid::update()
 {
     m_vel+=m_acc;
 
-    // limit velocity by max_speed
+    // Limit velocity to maximum speed
     if(m_vel.length() > max_speed)
     {
         m_vel = (m_vel/m_vel.length())*max_speed;
@@ -152,3 +144,4 @@ void Boid::update()
     m_pos+=m_vel;
     m_acc*=max_speed;
 }
+//----------------------------------------------------------------------------------------------------------------------

@@ -43,24 +43,7 @@ struct get3dVec
     }
 };
 
-// random generator
-struct randGen {
-    int maxVal;
-    randGen(int max) :
-            maxVal(max) {
-    }
-
-    int operator()() {
-        return rand() % maxVal;
-    }
-};
-
-FlockGPU::FlockGPU(int _numBoids)/* : m_numBoids(_numBoids), m_dPos(m_numBoids), m_dPosX(m_numBoids), m_dPosY(m_numBoids), m_dPosZ(m_numBoids),
-    m_dVel(m_numBoids),
-    m_dVelX(m_numBoids),
-    m_dVelY(m_numBoids),
-    m_dVelZ(m_numBoids),
-    m_pos(m_numBoids)*/
+FlockGPU::FlockGPU(int _numBoids)
 {
     m_numBoids=_numBoids;
 
@@ -96,58 +79,20 @@ FlockGPU::FlockGPU(int _numBoids)/* : m_numBoids(_numBoids), m_dPos(m_numBoids),
     m_dAccZ.resize(m_numBoids);
 
 
-//    //fill with rand
-//    thrust::fill(m_dPosX.begin(),               m_dPosX.begin()+NUM_BOIDS, (float(rand())/RAND_MAX) );
-//    thrust::fill(m_dPosY.begin()+NUM_BOIDS,     m_dPosY.begin()+2*NUM_BOIDS, (float(rand())/RAND_MAX) );
-//    thrust::fill(m_dPosZ.begin()+2*NUM_BOIDS,   m_dPosZ.begin()+3*NUM_BOIDS, (float(rand())/RAND_MAX) );
-
-//    thrust::fill(m_dVelX.begin()+3*NUM_BOIDS, m_dVelX.begin()+4*NUM_BOIDS, (float(rand())/RAND_MAX) );
-//    thrust::fill(m_dVelY.begin()+4*NUM_BOIDS, m_dVelY.begin()+5*NUM_BOIDS, (float(rand())/RAND_MAX) );
-//    thrust::fill(m_dVelZ.begin()+5*NUM_BOIDS, m_dVelZ.begin()+6*NUM_BOIDS, (float(rand())/RAND_MAX) );
-
-
-
-//-------------------RAND--------------TEST------------------------------1
-//    std::vector<float> randPos(m_numBoids*3);
-//    std::generate(randPos.begin(), randPos.end(),
-//                randGen(10)); //100
-
-//    std::vector<float> randVel(m_numBoids*3);
-//    std::generate(randVel.begin(), randVel.end(),
-//                randGen(10));
-
-//    m_dPosX = randPos;
-//    m_dPosY = randPos;
-//    m_dPosZ = randPos;
-
-//    m_dVelX = randVel;
-//    m_dVelY = randVel;
-//    m_dVelZ = randVel;
-//-------------------RAND--------------TEST------------------------------1
-
-
-
-//-------------------RAND--------------TEST------------------------------2
     thrust::device_vector <float> rand(NUM_BOIDS*6);
     float * randPtr = thrust::raw_pointer_cast(&rand[0]);
     randFloats(randPtr, NUM_BOIDS*6);
 
 
-    // give random start positions
+    // start with random pos
     m_dPosX.assign(rand.begin(), rand.begin() + NUM_BOIDS);
     m_dPosY.assign(rand.begin() + NUM_BOIDS, rand.begin() + 2*NUM_BOIDS);
     m_dPosZ.assign(rand.begin() + 2*NUM_BOIDS, rand.begin() + 3*NUM_BOIDS);
 
-    // give random start vel
+    // start with random vel
     m_dVelX.assign(rand.begin() + 3*NUM_BOIDS, rand.begin() + 4*NUM_BOIDS);
     m_dVelY.assign(rand.begin() + 4*NUM_BOIDS, rand.begin() + 5*NUM_BOIDS);
     m_dVelZ.assign(rand.begin() + 5*NUM_BOIDS, rand.begin() + 6*NUM_BOIDS);
-//-------------------RAND--------------TEST------------------------------2
-
-
-
-//    thrust::fill(m_dPos.begin(), m_dPos.begin()+m_numBoids,make_float3((float(rand())/RAND_MAX),(float(rand())/RAND_MAX),(float(rand())/RAND_MAX)));
-//    thrust::fill(m_dVel.begin(), m_dVel.begin()+m_numBoids,make_float3((float(rand())/RAND_MAX),(float(rand())/RAND_MAX),(float(rand())/RAND_MAX)));
 
 
     thrust::transform(thrust::make_zip_iterator(make_tuple(m_dPosX.begin(), m_dPosY.begin(), m_dPosZ.begin())),
@@ -176,9 +121,6 @@ FlockGPU::FlockGPU(int _numBoids)/* : m_numBoids(_numBoids), m_dPos(m_numBoids),
     m_dAliPtr = thrust::raw_pointer_cast(&m_dAli[0]);
 
     m_dAccPtr = thrust::raw_pointer_cast(&m_dAcc[0]);
-
-//    m_dPosPtr = thrust::raw_pointer_cast(m_dPos.data());
-//    m_dVelPtr = thrust::raw_pointer_cast(m_dVel.data());
 }
 
 FlockGPU::~FlockGPU()
@@ -192,7 +134,7 @@ void FlockGPU::separate()
     unsigned int N = m_numBoids/M + 1;
 
     unsigned int blockN = NUM_BOIDS/32 + 1;
-    dim3 block2(32, 32); // block of (X,Y) threads
+    dim3 block2(32, 32); // block of threads (x,y)
     dim3 grid2(blockN, 1); // grid blockN * blockN blocks
 
     thrust::fill(m_dSepX.begin(), m_dSepX.begin()+m_numBoids, 0);
@@ -206,8 +148,6 @@ void FlockGPU::separate()
     separateKernel<<<grid2,block2>>>(m_dSepPtr,m_dPosPtr,m_dVelPtr);
     cudaDeviceSynchronize();
 
-    //m_dSep*=1.5;
-    //thrust::copy(m_dPos.begin(),m_dPos.end(),m_pos.begin());
     std::vector<float3>m_sep(m_numBoids);
     thrust::copy(m_dSep.begin(),m_dSep.end(),m_sep.begin());
     for(unsigned int i=0; i<m_numBoids; ++i)
@@ -223,11 +163,9 @@ void FlockGPU::separate()
 
 void FlockGPU::align()
 {
-    //unsigned int M = 1024;
-    //unsigned int N = m_numBoids/M + 1;
 
     unsigned int blockN = NUM_BOIDS/32 + 1;
-    dim3 block2(32, 32); // block of (X,Y) threads
+    dim3 block2(32, 32); // block of threads (x,y)
     dim3 grid2(blockN, 1); // grid blockN * blockN blocks
 
     thrust::fill(m_dAliX.begin(), m_dAliX.begin()+m_numBoids, 0);
@@ -239,10 +177,8 @@ void FlockGPU::align()
                       get3dVec());
 
     alignmentKernel<<<grid2,block2>>>(m_dAliPtr,m_dPosPtr,m_dVelPtr);
-    //cudaThreadSynchronize();
     cudaDeviceSynchronize();
 
-    //m_dAli*=0.02;
     std::vector<float3>m_ali(m_numBoids);
     thrust::copy(m_dAli.begin(),m_dAli.end(),m_ali.begin());
     for(unsigned int i=0; i<m_numBoids; ++i)
@@ -252,9 +188,6 @@ void FlockGPU::align()
     m_dAli = m_ali;
 
     cudaDeviceSynchronize();
-    //don't need this
-    //applyForceKernel<<<N,M>>>(m_dAliPtr,m_dAccPtr);
-    //cudaThreadSynchronize();
 }
 
 void FlockGPU::cohesion()
@@ -263,7 +196,7 @@ void FlockGPU::cohesion()
     unsigned int N = m_numBoids/M + 1;
 
     unsigned int blockN = NUM_BOIDS/32 + 1;
-    dim3 block2(32, 32); // block of (X,Y) threads
+    dim3 block2(32, 32); // block of threads (x,y)
     dim3 grid2(blockN, 1); // grid blockN * blockN blocks
 
     thrust::fill(m_dCohX.begin(), m_dCohX.begin()+m_numBoids, 0);
@@ -277,7 +210,6 @@ void FlockGPU::cohesion()
     cohesionKernel<<<grid2,block2>>>(m_dCohPtr,m_dPosPtr,m_dVelPtr);
     cudaDeviceSynchronize();
 
-    //m_dCoh*=1.0;
     std::vector<float3>m_coh(m_numBoids);
     thrust::copy(m_dCoh.begin(),m_dCoh.end(),m_coh.begin());
     for(unsigned int i=0; i<m_numBoids; ++i)
@@ -304,46 +236,13 @@ void FlockGPU::update()
     unsigned int M = 1024;
     unsigned int N = m_numBoids/M + 1;
 
-    //thrust::fill(m_dTarget.begin(), m_dTarget.begin()+m_numBoids,0);
-
-    //steerKernel<<<N,M>>>(m_dPosPtr,m_dVelPtr,m_dTargetPtr,m_dTargetPtr);
-    //cudaThreadSynchronize();
-
-    //unsigned int blockN = NUM_BOIDS/32 + 1;
-    //dim3 block2(32, 32); // block of (X,Y) threads
-    //dim3 grid2(blockN, 1); // grid blockN * blockN blocks
-
-
-
-//    thrust::copy(m_dSep.begin(),m_dSep.end(),m_sep.begin());
-    //reset
-//    thrust::fill(m_dSep.begin(), m_dSep.begin()+m_numBoids, 0);
-//    thrust::fill(m_sep[0].x.begin(), m_sep[0].x.begin()+m_numBoids, 0);
-
-//    flockKernel<<<grid2,block2>>>(m_dCohPtr,m_dAliPtr,m_dAccPtr,m_dPosPtr,m_dVelPtr);
-//    cudaThreadSynchronize();
-
     updateKernel<<<N,M>>>(m_dPosPtr,m_dAccPtr,m_dVelPtr);
-//    cudaThreadSynchronize();
 
     flock();
 
     thrust::copy(m_dPos.begin(),m_dPos.end(),m_pos.begin());
 
     cudaDeviceSynchronize();
-
-    //print
-//    thrust::copy(m_dPosX.begin(),m_dPosX.end(),xTest.begin());
-//    thrust::copy(m_dPosY.begin(),m_dPosY.end(),yTest.begin());
-//    thrust::copy(m_dPosZ.begin(),m_dPosZ.end(),zTest.begin());
-//    std::cout<<"x: "<<m_pos[0].x<<'\n';
-//    std::cout<<"y: "<<m_pos[0].y<<'\n';
-//    std::cout<<"z: "<<m_pos[0].z<<'\n';
-//    std::cout<<"x: "<<xTest[0]<<'\n';
-//    std::cout<<"y: "<<yTest[0]<<'\n';
-//    std::cout<<"z: "<<zTest[0]<<'\n';
-//    printf("%d \n", m_dPosX[0]);
-
 }
 
 // From: https://github.com/NCCA/cuda_workshops/blob/master/shared/src/random.cu
